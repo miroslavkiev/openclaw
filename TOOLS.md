@@ -31,12 +31,19 @@ Things like:
 
 Skills are shared. Your setup is yours. Keeping them apart means you can update skills without losing your notes, and share skills without leaking your infrastructure.
 
-### Gmail signatures (gog)
-- Work Gmail account: krmy@ciklum.com
-- Default send-as: myroslav.kravchenko@ciklum.com
-- When creating Gmail drafts via `gog gmail drafts create/update`, append the official HTML signature from:
-  - `gog --account krmy@ciklum.com gmail settings sendas get myroslav.kravchenko@ciklum.com --json`
-  - JSON path: `.sendAs.signature` (HTML)
+### Gmail drafts (gog) - accounts + signature
+- Work Gmail account (API): krmy@ciklum.com
+- Personal Gmail account (API): kravch@gmail.com
+- For work, default send-as: myroslav.kravchenko@ciklum.com
+- Signature handling rule (important):
+  - LLM-generated message body must NOT include the signature.
+  - Add the official HTML signature only at the API request stage by appending it to `--body-html`.
+  - Signature source:
+    - `gog --account krmy@ciklum.com gmail settings sendas get myroslav.kravchenko@ciklum.com --json`
+    - JSON path: `.sendAs.signature` (HTML)
+- Closing preference:
+  - End message text with `Kind regards,` immediately followed by the signature (only one line break between them).
+  - Start emails with `Hi ...` (not `Hello`).
 
 ---
 
