@@ -1,0 +1,379 @@
+{
+  "account": "kravch@gmail.com",
+  "query": "category:promotions before:2019/01/01 -in:trash",
+  "pageTokenUsed": "16525517469698094924",
+  "nextPageToken": "15476261724749721328",
+  "candidates": 200,
+  "selectedTrash": 103,
+  "applied": 103,
+  "keep": 25,
+  "unclear": 72,
+  "errors": [],
+  "failed": [],
+  "trashPreview": [
+    {
+      "threadId": "162772e06e643443",
+      "from": "\"★ Покупон Еда и Развлечения ★\" <info@pokupon.ua>",
+      "subject": "☺ Некогда скучать, пора отдыхать!☺ ",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "162766929f193c9b",
+      "from": "\"◄ SuperDeal Развлечения►\" <support@superdeal.com.ua>",
+      "subject": "➽Погода - не помеха для отличного отдыха!➽",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "16275e6968292de8",
+      "from": "\"КупиСкидку\" <noreply@kupiskidku.com>",
+      "subject": "Заезды на картинге «SmartKart»; Зоопарк 12 Месяцев; Ресторане «Мон Шер» и др.",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "16275c7004151688",
+      "from": "Tomtop <no-reply@tomtop.com>",
+      "subject": "Bargain Alert! Everything For You Sale | March Best Offers",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "16275c419c04ef80",
+      "from": "\"The Kent & Sussex Tea & Coffee Company\" <info@tea-and-coffee.com>",
+      "subject": " ⚡Bank Holiday 20% OFF ⚡ + FREE 🐣 Chocolate Tea SALE NOW ON 🐣",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "162758ebb4078da4",
+      "from": "\"★ Покупон ★\" <info@pokupon.ua>",
+      "subject": "Фитнес-тур в отеле «Солнечный Прованс» в Сатанове 7499 грн. ☀ Празднование детского дня рождения в «PLAY CITY» 949 грн. ☀ От 3 дней в мае на базе «Солнечная» в Затоке 769 грн. ➤  ",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "1627583e362f3ddf",
+      "from": "\"◄ SuperDeal Киев►\" <support@superdeal.com.ua>",
+      "subject": "От 3 дней отдыха в мае на базе отдыха «Солнечная» в Затоке на Черном море  769 грн. ✨ Скидка 50% на все меню кухни в тематическом бар-ресторане «The Cage» 15 грн.    ",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "162728f548e4f426",
+      "from": "\"The Kent & Sussex Tea & Coffee Company\" <info@tea-and-coffee.com>",
+      "subject": " ⚡Bank Holiday 20% OFF ⚡ + FREE 🐣 Chocolate Tea SALE NOW ON 🐣",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "162726ece662419e",
+      "from": "\"GoToShop.net.ua\" <info@gotoshop.net.ua>",
+      "subject": "Новые акции и скидки супермаркетов Киева",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "162716a0446cea66",
+      "from": "\"◄ SuperDeal Красота►\" <support@superdeal.com.ua>",
+      "subject": "❤Всегда на высоте с SuperDeal! ❤ ",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "1627144a57945d52",
+      "from": "\"★ Покупон Туризм ★\" <info@pokupon.ua>",
+      "subject": "★Отдыхайте со скидкой в лучших отелях!★",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "16270e14cb49bcb6",
+      "from": "\"◄ SuperDeal Киев►\" <support@superdeal.com.ua>",
+      "subject": "Входной билет на целый день посещения аквапарка «Терминал» 149 грн. ✨ До 3 часов игры в боулинг в любое время в любой день в РЦ «Блокбастер» 209 грн.    ",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "162707d9221cca6f",
+      "from": "\"★ Покупон ★\" <info@pokupon.ua>",
+      "subject": "До 3 часов игры в боулинг в РЦ «Блокбастер» 209 грн. ☀ Два билета по цене одного в аквапарк Dream Island 230 грн. ☀ Летние каникулы в дневном лагере «ТОТОША» 2800 грн. ➤  ",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "1627061bb8a27fef",
+      "from": "Wizz Air <offers@news.wizzair.com>",
+      "subject": "Нова історія починається тут",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "1627017fdd3e1c7b",
+      "from": "\"КупиСкидку\" <noreply@kupiskidku.com>",
+      "subject": "Безоперационная липосакция от «Pudra»; Мужская или женская стрижка; LPG-массажа и прессотерапия и др.",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "1626d47e70281137",
+      "from": "\"GoToShop.net.ua\" <info@gotoshop.net.ua>",
+      "subject": "Новые акции и скидки супермаркетов Киева",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "1626cce240be0d85",
+      "from": "\"★ Покупон ★\" <info@pokupon.ua>",
+      "subject": "Принимайте участие в конкурсе от Pokupon и WOG!",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "1626cb24cca5fcdb",
+      "from": "\"METRO Cash & Carry\" <mccua-promo@metro.ua>",
+      "subject": "Солодкі новинки з Metro.Zakaz.UA. ",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "1626c408ef9b9e92",
+      "from": "\"◄ SuperDeal Скидки Даром ►\" <support@superdeal.com.ua>",
+      "subject": "☺ Бесплатные купоны на все что можно пожелать! ✌",
+      "reason": "unsub+promo"
+    },
+    {
+      "threadId": "1626c2e29d5dc008",
+      "from": "\"★ Покупон Красота ★\" <info@pokupon.ua>",
+      "subject": "❀ Все для весеннего образа!❀",
+      "reason": "unsub+promo"
+    }
+  ],
+  "keepPreview": [
+    {
+      "threadId": "162723be16fcb457",
+      "from": "\"★ Покупон Промокоды ★\" <info@pokupon.ua>",
+      "subject": "✰Бесплатные купоны:Parfum, 14 карат, Answear! Скидки до 82%!✰➤",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "16271b29c7c54eb4",
+      "from": "\"Мила (Topmall)\" <noreply@topmall.ua>",
+      "subject": "ТОП мебели IKEA за март + Бесплатная доставка курьером",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "1627181eb76284f9",
+      "from": "eBay <eBay@reply1.ebay.com>",
+      "subject": "Myroslav Kravchenko, need help signing into eBay?",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "1627171df555bafe",
+      "from": "eBay <eBay@reply1.ebay.com>",
+      "subject": "Myroslav, want up to 70% off? It’s the end of season sale",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "1626f2e5c62ef982",
+      "from": "\"Amazon.com Reviews\" <customer-reviews-messages@amazon.com>",
+      "subject": "What did you think? Review your recent Amazon purchase now.",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "1626bb7a9cb79315",
+      "from": "eBay <eBay@reply1.ebay.com>",
+      "subject": "Myroslav, top discounts for you, and this week's new items💡",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "162672ae9eae49f3",
+      "from": "eBay <eBay@reply1.ebay.com>",
+      "subject": "Myroslav Kravchenko, need help signing into eBay?",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "16261f8b4501a8aa",
+      "from": "\"★ Покупон Промокоды ★\" <info@pokupon.ua>",
+      "subject": "✰Бесплатные купоны:Ярус, Поехали с нами, Answear! Скидки до 82%!✰➤",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "16261d116bd6b8b7",
+      "from": "Wizz Air <offers@news.wizzair.com>",
+      "subject": "Найкращі пропозиції готелів і повернення коштів на рахунок Wizz Air у розмірі 10 % від вартості бронювання!",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "16260ff2ab73888c",
+      "from": "eBay <eBay@reply1.ebay.com>",
+      "subject": "Myroslav, we've got hot promotions for you 🔥",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "1625ce45295976cd",
+      "from": "\"★ Покупон Промокоды ★\" <info@pokupon.ua>",
+      "subject": "⚡Бесплатные купоны:Uklon, Секунда,Answear!Скидки до 99%! ⚡",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "1625b63ce770c98e",
+      "from": "PayPal <paypal@mail.paypal.com>",
+      "subject": "Your legal agreements with PayPal",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "1625742bef50a703",
+      "from": "The Kent and Sussex Tea and Coffee Company <info@tea-and-coffee.com>",
+      "subject": "Get 10% OFF + FREE GIFT of 🌻 SPRING TEA 🌻 Use Code: SPRING",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "16252d506645fb6b",
+      "from": "The Kent and Sussex Tea and Coffee Company <info@tea-and-coffee.com>",
+      "subject": "Get 10% OFF + FREE GIFT of 🌻 SPRING TEA 🌻 Use Code: SPRING",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "16252c914b7285ff",
+      "from": "eBay <eBay@reply1.ebay.com>",
+      "subject": "Myroslav Kravchenko, need help signing into eBay?",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "1624e657b0479ce5",
+      "from": "\"★ Покупон Промокоды ★\" <info@pokupon.ua>",
+      "subject": "✰Бесплатные купоны:Ярус, Золотой стандарт, Sunhouse! Скидки до 99%!✰➤",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "1624876d98741d05",
+      "from": "eBay <eBay@reply1.ebay.com>",
+      "subject": "Myroslav Kravchenko, need help signing into eBay?",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "16247a16b849d848",
+      "from": "eBay <eBay@reply1.ebay.com>",
+      "subject": "Myroslav, top discounts for you, and this week's new items💡",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "16244607e22642bb",
+      "from": "TopCashback <offers@e.topcashback.com>",
+      "subject": "LIMITED TIME: 15% off at eBay + 2% cash back",
+      "reason": "keep_keyword_or_provider"
+    },
+    {
+      "threadId": "1623ea90ff4cff95",
+      "from": "Wizz Air <offers@news.wizzair.com>",
+      "subject": "Use your 50 EUR promo code - within 2 days!",
+      "reason": "keep_keyword_or_provider"
+    }
+  ],
+  "unclearPreview": [
+    {
+      "threadId": "16276dcccabb08ed",
+      "from": "\"Dobovo.com\" <info@dobovo.com>",
+      "subject": "⭐ Какие планы на апрель? Выбирайте лучшие концерты и фестивали :)",
+      "reason": "no_promo_kw"
+    },
+    {
+      "threadId": "162761f7a27e0c05",
+      "from": "\"ITbox.ua\" <welcome@itbox.ua>",
+      "subject": "🔆 Подарунки на Великдень!",
+      "reason": "no_promo_kw"
+    },
+    {
+      "threadId": "16273c1999218174",
+      "from": "\"Ceneo.pl\" <no-reply@ceneo.pl>",
+      "subject": "✨ Megaokazje - lśniący dom z Ceneo.pl",
+      "reason": "no_unsub"
+    },
+    {
+      "threadId": "16273b7283049814",
+      "from": "\"Marvel Битва чемпионов\" <news@contestofchampions.kabam.com>",
+      "subject": "[ВИДЕО] Получи НОВОГО чемпиона — Саблезубого!",
+      "reason": "no_promo_kw"
+    },
+    {
+      "threadId": "16273323f5abe404",
+      "from": "\"Recruiter.com\" <marketing@recruiter.com>",
+      "subject": "True Value: Asset Token’s Rewards Points Solves 'Unused Rewards' Problem!",
+      "reason": "no_unsub"
+    },
+    {
+      "threadId": "1627255b8c4cb457",
+      "from": "Slotomania <slotomania@news1.playtika.com>",
+      "subject": "💖Ready, Set, GO!💖",
+      "reason": "no_promo_kw"
+    },
+    {
+      "threadId": "162723384f2fd951",
+      "from": "Tapatalk <trending@tapatalk.com>",
+      "subject": "Clips from \"Roseanne\" Reboot",
+      "reason": "no_unsub"
+    },
+    {
+      "threadId": "162713351ad261ff",
+      "from": "\"Gran Meliá Hotels & Resorts\" <info@emailer.melia.com>",
+      "subject": "Gran Meliá welcomes you this spring",
+      "reason": "no_promo_kw"
+    },
+    {
+      "threadId": "1626d7bf24f3067f",
+      "from": "\"Ваш репетитор\" <hello@repetitors.info>",
+      "subject": "Возможны варианты",
+      "reason": "no_promo_kw"
+    },
+    {
+      "threadId": "1626cbc6ca930de1",
+      "from": "\"Dobovo.com\" <info@dobovo.com>",
+      "subject": "🐣🐥Куда поехать на Пасху в Украине →",
+      "reason": "no_promo_kw"
+    },
+    {
+      "threadId": "1626c6e73b9ba592",
+      "from": "\"ITbox.ua\" <welcome@itbox.ua>",
+      "subject": "На Великдень з подарунками! Щоденні розіграші",
+      "reason": "no_promo_kw"
+    },
+    {
+      "threadId": "1626c27d258805b0",
+      "from": "Pesoto Ukraine <info-ua@pesoto.com>",
+      "subject": "TOP 10 актуальних знижок 28.03.2018",
+      "reason": "no_promo_kw"
+    },
+    {
+      "threadId": "1626bebf68efcbad",
+      "from": "Tomtop <no-reply@tomtop.com>",
+      "subject": "Top Sellers of 2018 Shopping Carnival, From $0.19",
+      "reason": "no_promo_kw"
+    },
+    {
+      "threadId": "1626b8160a7b227a",
+      "from": "Houzz Team <messages@houzz.com>",
+      "subject": "LAST CHANCE: Please Take Our Survey - Win $1,500",
+      "reason": "no_promo_kw"
+    },
+    {
+      "threadId": "1626a0fa3a1802fc",
+      "from": "Grammarly Insights <info@send.grammarly.com>",
+      "subject": "Your Weekly Progress Report + Stories & Tips",
+      "reason": "no_promo_kw"
+    },
+    {
+      "threadId": "162693f307ddc25a",
+      "from": "\"Ceneo.pl\" <no-reply@ceneo.pl>",
+      "subject": "🏆 Odpowiadaj i wygrywaj! Pytania i odpowiedzi na Ceneo.pl",
+      "reason": "no_unsub"
+    },
+    {
+      "threadId": "1626844840b46bc0",
+      "from": "\"Recruiter.com\" <marketing@recruiter.com>",
+      "subject": "Inserviss Global Services Marketplace",
+      "reason": "no_unsub"
+    },
+    {
+      "threadId": "162680eb1004daf9",
+      "from": "Slotomania <slotomania@news1.playtika.com>",
+      "subject": "✨Need more Sloto Cards?✨",
+      "reason": "no_promo_kw"
+    },
+    {
+      "threadId": "162676b2a9c3520f",
+      "from": "DOU <support@dou.ua>",
+      "subject": "Рассылка DOU #220: результаты рекрутинг-опроса, IT-рынок Ровно, стажировки апреля",
+      "reason": "no_unsub"
+    },
+    {
+      "threadId": "1626691e763fb553",
+      "from": "Tomtop <no-reply@tomtop.com>",
+      "subject": "GJS GEIO, The World’s 1st FPS Battle Bot with Visual Recognition",
+      "reason": "no_promo_kw"
+    }
+  ]
+}
