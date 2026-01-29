@@ -18,12 +18,13 @@ Source: user message (2026-01-29). This is the desired end-state behavior for th
 
 ## Draft generation steps
 1) Fetch latest message + thread context (last 3-8 messages) via `gog gmail thread get --full`.
-2) Extract correct recipient display name from the From header (use real display name, not username).
+2) Extract recipient display name from the From header.
 3) Detect inbound language (en/de/uk) and generate reply in the same language.
 4) Generate reply via `clawdbot agent --json` (no `--deliver`), using prompt:
    - short, friendly, professional
    - use thread context
    - do not use em-dash (only hyphen '-')
+   - pass the full display name and instruct the LLM to extract the first name for greeting: `Hi <first name>,` (fallback: `Hi,`)
 5) Signature handling:
    - Fetch work HTML signature via `gog gmail settings sendas get myroslav.kravchenko@ciklum.com --json`.
    - Append signature to the draft HTML with one normal gap (no dividers).
