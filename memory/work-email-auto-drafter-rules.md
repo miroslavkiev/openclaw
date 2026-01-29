@@ -27,6 +27,7 @@ Source: user message (2026-01-29). This is the desired end-state behavior for th
    - pass the full display name and instruct the LLM to extract the first name for greeting: `Hi <first name>,` (fallback: `Hi,`)
 - Important: the webhook handler must ACK fast. Draft creation (thread fetch + LLM) runs async in background to avoid `gog watch serve` hook timeouts ("context canceled").
 - Draft body should include the quoted previous email below the signature (gmail_quote block), similar to Gmail Reply All UI.
+- Important: to preserve Outlook HTML tables in quote, extract HTML part via `gog gmail get --format full` and sanitize (strip head/style/script/meta/link, keep body inner HTML). `--format raw` does not include payload parts, so HTML quote will be empty.
 5) Signature handling:
    - Fetch work HTML signature via `gog gmail settings sendas get myroslav.kravchenko@ciklum.com --json`.
    - Append signature to the draft HTML with one normal gap (no dividers).
