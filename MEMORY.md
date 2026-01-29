@@ -30,6 +30,7 @@
 - Accounts available in gog auth:
   - Work: krmy@ciklum.com
   - Personal: kravch@gmail.com
+- Default behavior: when user requests an email reply (thread context provided), create a Gmail draft automatically via `gog` unless they explicitly ask for text-only.
 - For work drafts, send-as to use: myroslav.kravchenko@ciklum.com
 - Signature rule: message text should be generated without the signature, and the official HTML signature must be appended only when creating/updating the draft via API.
 - Formatting rule: keep only one line break between "Kind regards," and the signature HTML.

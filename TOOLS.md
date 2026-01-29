@@ -35,6 +35,9 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 - Work Gmail account (API): krmy@ciklum.com
 - Personal Gmail account (API): kravch@gmail.com
 - For work, default send-as: myroslav.kravchenko@ciklum.com
+- Default behavior (important):
+  - When you paste an inbound email thread and ask for a reply, I should create a Gmail draft automatically via `gog gmail drafts create/update` (not just output text).
+  - Exceptions: if required info is missing, I ask 1-2 clarifying questions first; if you explicitly request “text only”, I will not create a draft.
 - Signature handling rule (important):
   - LLM-generated message body must NOT include the signature.
   - Add the official HTML signature only at the API request stage by appending it to `--body-html`.
