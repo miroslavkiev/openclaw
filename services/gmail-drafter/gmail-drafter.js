@@ -269,6 +269,49 @@ async function getWorkSignatureHtml() {
   return (obj.sendAs && obj.sendAs.signature) ? String(obj.sendAs.signature) : '';
 }
 
+async function getMessageFull(messageId) {
+  const { out } = await execFile(GOG_BIN, [
+    '--client', GOG_CLIENT,
+    '--account', WORK_ACCOUNT,
+    'gmail', 'get',
+    messageId,
+    '--format', 'full',
+    '--json',
+  ], 120000);
+  return JSON.parse(out || '{}');
+}
+
+function buildGmailQuoteHtml({ headers, bodyText }) {
+  const esc = (s) => String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  const h = headers || {};
+  const from = h.from || '';
+  const date = h.date || '';
+  const subj = h.subject || '';
+
+  const attrBits = [];
+  if (date) attrBits.push(date);
+  if (from) attrBits.push(from);
+
+  const attrLine = attrBits.length ? `On ${esc(attrBits.join(', '))} wrote:` : 'On a previous message wrote:';
+
+  const quoted = esc(String(bodyText || '')).replace(/\r?\n/g, '<br>');
+
+  return [
+    '<div class="gmail_quote">',
+    `<div dir="ltr" class="gmail_attr">${attrLine}</div>`,
+    '<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px solid #ccc;padding-left:1ex;">',
+    // include subject line as context if present
+    subj ? `<div><b>Subject:</b> ${esc(subj)}</div><br>` : '',
+    `<div dir="ltr">${quoted}</div>`,
+    '</blockquote>',
+    '</div>',
+  ].join('');
+}
+
 function plainToHtml(text) {
   const esc = (s) => String(s)
     .replace(/&/g, '&amp;')
@@ -326,8 +369,24 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, si
   if (!cleaned) throw new Error('LLM returned empty draft');
 
   const bodyHtml = plainToHtml(cleaned);
+
+  // Append quoted previous message(s) similar to Gmail UI.
+  // We quote the triggering message (replyToMessageId) below the signature.
+  let quoteHtml = '';
+  try {
+    const full = await getMessageFull(replyToMessageId);
+    quoteHtml = buildGmailQuoteHtml({
+      headers: full.headers || (full.message && full.message.payload ? {} : {}),
+      bodyText: full.body || '',
+    });
+  } catch (e) {
+    // If quoting fails, still create the draft without quote.
+    logLine({ event: 'warn', where: 'build_quote', messageId: replyToMessageId, error: String(e && e.message ? e.message : e) });
+  }
+
   // Exactly one visual blank line before signature:
-  const fullHtml = bodyHtml.replace(/<\/div>$/, '') + '<br>' + '</div>' + '\n' + signatureHtml;
+  let fullHtml = bodyHtml.replace(/<\/div>$/, '') + '<br>' + '</div>' + '\n' + signatureHtml;
+  if (quoteHtml) fullHtml += '\n' + quoteHtml;
 
   const args = [
     '--client', GOG_CLIENT,
