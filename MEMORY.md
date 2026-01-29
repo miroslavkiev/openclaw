@@ -16,6 +16,11 @@
 - Gmail push via Cloudflare + Pub/Sub + `gog watch serve` -> local drafter.
 - No WhatsApp notifications for auto-drafts.
 - Work mailbox auto-draft rules saved in: `memory/work-email-auto-drafter-rules.md`.
+- Local drafter service:
+  - Code: `services/gmail-drafter/gmail-drafter.js`
+  - LaunchAgent: `com.mk.gmail-drafter` (listens on 127.0.0.1:18990, path `/gmail-work`)
+  - Watcher: `com.mk.gog.gmail-work-serve` (gog watch serve -> hook-url http://127.0.0.1:18990/gmail-work)
+  - Behavior: auto-draft for eligible inbound work emails; reply-to-all mode (preserve CC), no WhatsApp pings.
 
 ## Privacy note
 - Do not store sensitive personal data (DOB, full address, residence permit details) unless explicitly requested.
