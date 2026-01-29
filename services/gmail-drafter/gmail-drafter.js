@@ -278,7 +278,7 @@ function plainToHtml(text) {
   return `<div dir="ltr">${paras.join('')}</div>`;
 }
 
-async function draftWithLlm({ to, subject, replyToMessageId, contextText, signatureHtml, recipientName }) {
+async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, signatureHtml, recipientName }) {
   const greet = recipientName ? `Hi ${recipientName},` : 'Hi,';
   const prompt = [
     'You are an assistant drafting a reply email for a busy professional.',
@@ -322,6 +322,7 @@ async function draftWithLlm({ to, subject, replyToMessageId, contextText, signat
     '--from', FROM_ALIAS,
     '--body-html', fullHtml,
   ];
+  if (cc) args.push('--cc', cc);
   if (replyToMessageId) args.push('--reply-to-message-id', replyToMessageId);
 
   return await execFile(GOG_BIN, args, 120000);
@@ -374,13 +375,31 @@ const server = http.createServer(async (req, res) => {
 
       const replySubject = subj.toLowerCase().startsWith('re:') ? subj : `Re: ${subj}`;
 
+      // Reply-to-all mode:
+      // - To: original sender + other To recipients (excluding me/my aliases)
+      // - Cc: original CC recipients (excluding me/my aliases)
+      const myAddrs = new Set([
+        WORK_ACCOUNT.toLowerCase(),
+        FROM_ALIAS.toLowerCase(),
+        ...WORK_RECIPIENTS,
+      ]);
+      const uniq = (arr) => Array.from(new Set(arr.map((x) => String(x || '').trim().toLowerCase()).filter(Boolean)));
+      const toAddrs = uniq([
+        fromEmail,
+        ...extractAllEmails(msg.to || ''),
+      ]).filter((e) => !myAddrs.has(e));
+      const ccAddrs = uniq([
+        ...extractAllEmails(msg.cc || ''),
+      ]).filter((e) => !myAddrs.has(e));
+
       // Build thread context and let the agent draft the reply "by meaning".
       const contextText = await getThreadContextText(msg.id, 8);
       const signatureHtml = await getWorkSignatureHtml();
       const recipientName = extractDisplayName(msg.from || '') || extractDisplayName(pickHeader((msg.headers || []), 'From'));
 
       const result = await draftWithLlm({
-        to: fromEmail,
+        to: toAddrs.join(','),
+        cc: ccAddrs.join(','),
         subject: replySubject,
         replyToMessageId: msg.id,
         contextText,
