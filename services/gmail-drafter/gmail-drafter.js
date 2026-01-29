@@ -184,6 +184,17 @@ function extractTextPlain(payload) {
   return '';
 }
 
+function extractTextHtml(payload) {
+  if (!payload) return '';
+  if (payload.mimeType === 'text/html' && payload.body && payload.body.data) return b64urlDecode(payload.body.data);
+  const parts = payload.parts || [];
+  for (const p of parts) {
+    const t = extractTextHtml(p);
+    if (t) return t;
+  }
+  return '';
+}
+
 async function getThreadContextText(messageId, maxMessages = 6) {
   // Find thread id
   const meta = await execFile(GOG_BIN, [
@@ -269,19 +280,41 @@ async function getWorkSignatureHtml() {
   return (obj.sendAs && obj.sendAs.signature) ? String(obj.sendAs.signature) : '';
 }
 
-async function getMessageFull(messageId) {
+async function getMessageRaw(messageId) {
   const { out } = await execFile(GOG_BIN, [
     '--client', GOG_CLIENT,
     '--account', WORK_ACCOUNT,
     'gmail', 'get',
     messageId,
-    '--format', 'full',
+    '--format', 'raw',
     '--json',
   ], 120000);
   return JSON.parse(out || '{}');
 }
 
-function buildGmailQuoteHtml({ headers, bodyText }) {
+function sanitizeQuotedHtml(html) {
+  let s = String(html || '');
+  // Prefer body inner HTML when present
+  const bodyMatch = s.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  if (bodyMatch) s = bodyMatch[1];
+
+  // Remove head/style/script/meta/link/title blocks/tags
+  s = s.replace(/<head[^>]*>[\s\S]*?<\/head>/gi, '');
+  s = s.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+  s = s.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+  s = s.replace(/<meta[^>]*>/gi, '');
+  s = s.replace(/<link[^>]*>/gi, '');
+  s = s.replace(/<title[^>]*>[\s\S]*?<\/title>/gi, '');
+
+  // Strip outer html/body tags if still present
+  s = s.replace(/<\/?html[^>]*>/gi, '');
+  s = s.replace(/<\/?body[^>]*>/gi, '');
+
+  // Trim and return
+  return s.trim();
+}
+
+function buildGmailQuoteHtml({ headers, quotedHtml, bodyText }) {
   const esc = (s) => String(s || '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -298,15 +331,20 @@ function buildGmailQuoteHtml({ headers, bodyText }) {
 
   const attrLine = attrBits.length ? `On ${esc(attrBits.join(', '))} wrote:` : 'On a previous message wrote:';
 
-  const quoted = esc(String(bodyText || '')).replace(/\r?\n/g, '<br>');
+  let inner = '';
+  if (quotedHtml) {
+    inner = `<div dir="ltr">${sanitizeQuotedHtml(quotedHtml)}</div>`;
+  } else {
+    const quoted = esc(String(bodyText || '')).replace(/\r?\n/g, '<br>');
+    inner = `<div dir="ltr">${quoted}</div>`;
+  }
 
   return [
     '<div class="gmail_quote">',
     `<div dir="ltr" class="gmail_attr">${attrLine}</div>`,
     '<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px solid #ccc;padding-left:1ex;">',
-    // include subject line as context if present
     subj ? `<div><b>Subject:</b> ${esc(subj)}</div><br>` : '',
-    `<div dir="ltr">${quoted}</div>`,
+    inner,
     '</blockquote>',
     '</div>',
   ].join('');
@@ -370,15 +408,18 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, si
 
   const bodyHtml = plainToHtml(cleaned);
 
-  // Append quoted previous message(s) similar to Gmail UI.
+  // Append quoted previous message similar to Gmail UI.
   // We quote the triggering message (replyToMessageId) below the signature.
   let quoteHtml = '';
   try {
-    const full = await getMessageFull(replyToMessageId);
-    quoteHtml = buildGmailQuoteHtml({
-      headers: full.headers || (full.message && full.message.payload ? {} : {}),
-      bodyText: full.body || '',
-    });
+    const raw = await getMessageRaw(replyToMessageId);
+    const headers = raw.headers || {};
+    const payload = raw.message && raw.message.payload ? raw.message.payload : null;
+    const quotedHtml = extractTextHtml(payload);
+    const bodyText = raw.body || extractTextPlain(payload) || '';
+
+    // Use HTML quote when possible (preserves Outlook tables). Fallback to plain text.
+    quoteHtml = buildGmailQuoteHtml({ headers, quotedHtml: quotedHtml || '', bodyText });
   } catch (e) {
     // If quoting fails, still create the draft without quote.
     logLine({ event: 'warn', where: 'build_quote', messageId: replyToMessageId, error: String(e && e.message ? e.message : e) });
