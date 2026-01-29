@@ -280,13 +280,13 @@ async function getWorkSignatureHtml() {
   return (obj.sendAs && obj.sendAs.signature) ? String(obj.sendAs.signature) : '';
 }
 
-async function getMessageRaw(messageId) {
+async function getMessageFull(messageId) {
   const { out } = await execFile(GOG_BIN, [
     '--client', GOG_CLIENT,
     '--account', WORK_ACCOUNT,
     'gmail', 'get',
     messageId,
-    '--format', 'raw',
+    '--format', 'full',
     '--json',
   ], 120000);
   return JSON.parse(out || '{}');
@@ -412,11 +412,11 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, si
   // We quote the triggering message (replyToMessageId) below the signature.
   let quoteHtml = '';
   try {
-    const raw = await getMessageRaw(replyToMessageId);
-    const headers = raw.headers || {};
-    const payload = raw.message && raw.message.payload ? raw.message.payload : null;
+    const full = await getMessageFull(replyToMessageId);
+    const headers = full.headers || {};
+    const payload = full.message && full.message.payload ? full.message.payload : null;
     const quotedHtml = extractTextHtml(payload);
-    const bodyText = raw.body || extractTextPlain(payload) || '';
+    const bodyText = full.body || extractTextPlain(payload) || '';
 
     // Use HTML quote when possible (preserves Outlook tables). Fallback to plain text.
     quoteHtml = buildGmailQuoteHtml({ headers, quotedHtml: quotedHtml || '', bodyText });
