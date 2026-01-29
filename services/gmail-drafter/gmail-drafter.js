@@ -344,6 +344,92 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, si
   return await execFile(GOG_BIN, args, 120000);
 }
 
+// The gog watch hook has a relatively short HTTP timeout.
+// Creating drafts can be slow (thread fetch + LLM), so we ACK quickly and process in background.
+const queue = [];
+const seen = new Map(); // messageId -> ts
+let processing = false;
+
+function remember(id) {
+  const now = Date.now();
+  seen.set(String(id), now);
+  // keep map small
+  if (seen.size > 5000) {
+    const entries = Array.from(seen.entries()).sort((a, b) => a[1] - b[1]);
+    for (const [k] of entries.slice(0, 1000)) seen.delete(k);
+  }
+}
+
+async function processQueue() {
+  if (processing) return;
+  processing = true;
+  try {
+    while (queue.length) {
+      const msg = queue.shift();
+      if (!msg) continue;
+
+      const fromEmail = extractEmail(msg.from || '');
+      const subj = msg.subject || '';
+
+      if (!fromEmail || !subj) {
+        logLine({ event: 'skipped', skipped: [{ reason: 'missing_from_or_subject', from: msg.from, subject: msg.subject, to: msg.to }] });
+        continue;
+      }
+      if (!isAllowedSender(fromEmail)) {
+        logLine({ event: 'skipped', skipped: [{ fromEmail, subj, reason: 'sender_domain_not_allowed' }] });
+        continue;
+      }
+      if (!addressedToMe(msg)) {
+        logLine({ event: 'skipped', skipped: [{ fromEmail, subj, reason: 'not_addressed_to_me', to: msg.to, cc: msg.cc, bcc: msg.bcc, deliveredTo: msg.deliveredTo || msg.delivered_to }] });
+        continue;
+      }
+      if (looksLikeBroadcast(msg)) {
+        logLine({ event: 'skipped', skipped: [{ fromEmail, subj, reason: 'looks_like_broadcast', to: msg.to, cc: msg.cc }] });
+        continue;
+      }
+
+      try {
+        const replySubject = subj.toLowerCase().startsWith('re:') ? subj : `Re: ${subj}`;
+
+        // Reply-to-all mode:
+        const myAddrs = new Set([
+          WORK_ACCOUNT.toLowerCase(),
+          FROM_ALIAS.toLowerCase(),
+          ...WORK_RECIPIENTS,
+        ]);
+        const uniq = (arr) => Array.from(new Set(arr.map((x) => String(x || '').trim().toLowerCase()).filter(Boolean)));
+        const toAddrs = uniq([
+          fromEmail,
+          ...extractAllEmails(msg.to || ''),
+        ]).filter((e) => !myAddrs.has(e));
+        const ccAddrs = uniq([
+          ...extractAllEmails(msg.cc || ''),
+        ]).filter((e) => !myAddrs.has(e));
+
+        const contextText = await getThreadContextText(msg.id, 8);
+        const signatureHtml = await getWorkSignatureHtml();
+        const recipientName = extractDisplayName(msg.from || '') || extractDisplayName(pickHeader((msg.headers || []), 'From'));
+
+        await draftWithLlm({
+          to: toAddrs.join(','),
+          cc: ccAddrs.join(','),
+          subject: replySubject,
+          replyToMessageId: msg.id,
+          contextText,
+          signatureHtml,
+          recipientName,
+        });
+
+        logLine({ event: 'draft_created', fromEmail, subject: replySubject, replyTo: msg.id, mode: 'llm' });
+      } catch (e) {
+        logLine({ event: 'error', where: 'process_message', messageId: msg.id, error: String(e && e.message ? e.message : e) });
+      }
+    }
+  } finally {
+    processing = false;
+  }
+}
+
 const server = http.createServer(async (req, res) => {
   try {
     if (req.method !== 'POST') return json(res, 405, { ok: false, error: 'method_not_allowed' });
@@ -363,73 +449,24 @@ const server = http.createServer(async (req, res) => {
     }
 
     const msgs = Array.isArray(payload.messages) ? payload.messages : [];
-    const created = [];
-    const skipped = [];
-
     logLine({ event: 'request', count: msgs.length, keys: Object.keys(payload || {}) });
 
-    for (const msg of msgs) {
-      const fromEmail = extractEmail(msg.from || '');
-      const subj = msg.subject || '';
-
-      if (!fromEmail || !subj) {
-        skipped.push({ reason: 'missing_from_or_subject', from: msg.from, subject: msg.subject, to: msg.to });
-        continue;
-      }
-      if (!isAllowedSender(fromEmail)) {
-        skipped.push({ fromEmail, subj, reason: 'sender_domain_not_allowed' });
-        continue;
-      }
-      if (!addressedToMe(msg)) {
-        skipped.push({ fromEmail, subj, reason: 'not_addressed_to_me', to: msg.to, cc: msg.cc, bcc: msg.bcc, deliveredTo: msg.deliveredTo || msg.delivered_to });
-        continue;
-      }
-      if (looksLikeBroadcast(msg)) {
-        skipped.push({ fromEmail, subj, reason: 'looks_like_broadcast', to: msg.to, cc: msg.cc });
-        continue;
-      }
-
-      const replySubject = subj.toLowerCase().startsWith('re:') ? subj : `Re: ${subj}`;
-
-      // Reply-to-all mode:
-      // - To: original sender + other To recipients (excluding me/my aliases)
-      // - Cc: original CC recipients (excluding me/my aliases)
-      const myAddrs = new Set([
-        WORK_ACCOUNT.toLowerCase(),
-        FROM_ALIAS.toLowerCase(),
-        ...WORK_RECIPIENTS,
-      ]);
-      const uniq = (arr) => Array.from(new Set(arr.map((x) => String(x || '').trim().toLowerCase()).filter(Boolean)));
-      const toAddrs = uniq([
-        fromEmail,
-        ...extractAllEmails(msg.to || ''),
-      ]).filter((e) => !myAddrs.has(e));
-      const ccAddrs = uniq([
-        ...extractAllEmails(msg.cc || ''),
-      ]).filter((e) => !myAddrs.has(e));
-
-      // Build thread context and let the agent draft the reply "by meaning".
-      const contextText = await getThreadContextText(msg.id, 8);
-      const signatureHtml = await getWorkSignatureHtml();
-      const recipientName = extractDisplayName(msg.from || '') || extractDisplayName(pickHeader((msg.headers || []), 'From'));
-
-      const result = await draftWithLlm({
-        to: toAddrs.join(','),
-        cc: ccAddrs.join(','),
-        subject: replySubject,
-        replyToMessageId: msg.id,
-        contextText,
-        signatureHtml,
-        recipientName,
-      });
-
-      created.push({ fromEmail, subject: replySubject, result: result.out });
-      logLine({ event: 'draft_created', fromEmail, subject: replySubject, replyTo: msg.id, mode: 'llm' });
+    let enqueued = 0;
+    for (const m of msgs) {
+      const id = m && m.id;
+      if (!id) continue;
+      if (seen.has(String(id))) continue;
+      remember(id);
+      queue.push(m);
+      enqueued += 1;
     }
 
-    if (skipped.length) logLine({ event: 'skipped', skipped });
-    return json(res, 200, { ok: true, created, skipped, count: msgs.length });
+    // fire-and-forget processing
+    processQueue().catch(() => {});
+
+    return json(res, 200, { ok: true, enqueued, count: msgs.length });
   } catch (e) {
+    logLine({ event: 'error', where: 'http_handler', error: String(e && e.message ? e.message : e) });
     return json(res, 500, { ok: false, error: String(e && e.message ? e.message : e) });
   }
 });
