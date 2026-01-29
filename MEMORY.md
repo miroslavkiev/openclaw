@@ -21,7 +21,7 @@
   - LaunchAgent: `com.mk.gmail-drafter` (listens on 127.0.0.1:18990, path `/gmail-work`)
   - Watcher: `com.mk.gog.gmail-work-serve` (gog watch serve -> hook-url http://127.0.0.1:18990/gmail-work)
   - Behavior: auto-draft for eligible inbound work emails; reply-to-all mode (preserve CC), no WhatsApp pings.
-  - Implementation note: webhook ACKs immediately and processes draft creation asynchronously to avoid `gog watch serve` hook timeout (context canceled).
+  - Implementation note: webhook ACKs immediately and processes draft creation asynchronously (background queue) to avoid `gog watch serve` hook timeout ("context canceled").
 
 ## Privacy note
 - Do not store sensitive personal data (DOB, full address, residence permit details) unless explicitly requested.
