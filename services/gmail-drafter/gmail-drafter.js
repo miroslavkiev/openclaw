@@ -292,8 +292,7 @@ function plainToHtml(text) {
 }
 
 async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, signatureHtml, recipientName }) {
-  const greetName = nameForGreeting(recipientName);
-  const greet = greetName ? `Hi ${greetName},` : 'Hi,';
+  const displayName = String(recipientName || '').trim();
   const prompt = [
     'You are an assistant drafting a reply email for a busy professional.',
     'Requirements:',
@@ -302,7 +301,10 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, si
     '- Keep it concise and actionable.',
     '- Use hyphen (-) only; never use em dash (—) or en dash (–).',
     '- Do not hallucinate facts; if information is missing, ask a short clarifying question.',
-    `- Start the reply with exactly: ${greet}`,
+    '',
+    `Recipient display name from From header: ${displayName || '(missing)'}`,
+    'Extract the recipient first name from the display name and start the reply with exactly: Hi <first name>,',
+    'If you cannot confidently extract a first name, start with: Hi,',
     '',
     'THREAD CONTEXT (most recent first):',
     contextText,
