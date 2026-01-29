@@ -25,6 +25,7 @@ Source: user message (2026-01-29). This is the desired end-state behavior for th
    - use thread context
    - do not use em-dash (only hyphen '-')
    - pass the full display name and instruct the LLM to extract the first name for greeting: `Hi <first name>,` (fallback: `Hi,`)
+- Important: the webhook handler must ACK fast. Draft creation (thread fetch + LLM) runs async in background to avoid `gog watch serve` hook timeouts ("context canceled").
 5) Signature handling:
    - Fetch work HTML signature via `gog gmail settings sendas get myroslav.kravchenko@ciklum.com --json`.
    - Append signature to the draft HTML with one normal gap (no dividers).
