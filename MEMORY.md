@@ -13,8 +13,9 @@
 - Address (allowed to store): Karolinenstraße 128, 90763 Fürth
 
 ## Email automation (current)
-- Gmail push via Cloudflare + Pub/Sub + gog watch; Clawdbot hooks disabled for WhatsApp noise.
-- Work mailbox: auto-create drafts only for direct mails from @ciklum.com or @adidas.com; no WhatsApp alerts.
+- Gmail push via Cloudflare + Pub/Sub + `gog watch serve` -> local drafter.
+- No WhatsApp notifications for auto-drafts.
+- Work mailbox auto-draft rules saved in: `memory/work-email-auto-drafter-rules.md`.
 
 ## Privacy note
 - Do not store sensitive personal data (DOB, full address, residence permit details) unless explicitly requested.
