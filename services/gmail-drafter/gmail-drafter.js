@@ -51,10 +51,23 @@ function extractDisplayName(addr) {
   const s = String(addr).trim();
   // "Name <email>" -> Name
   const m = s.match(/^\s*([^<]+?)\s*<[^>]+>\s*$/);
-  const name = (m ? m[1] : '').trim();
+  let name = (m ? m[1] : '').trim();
+  // strip surrounding quotes
+  name = name.replace(/^"+|"+$/g, '').trim();
   // If it's just an email address, return empty
-  if (name && !name.includes('@')) return name;
-  return '';
+  if (!name || name.includes('@')) return '';
+  return name;
+}
+
+function nameForGreeting(displayName) {
+  const n = String(displayName || '').trim().replace(/^"+|"+$/g, '').trim();
+  if (!n) return '';
+  // Convert "Surname, Name" -> "Name" (prefer first name for greeting)
+  if (n.includes(',')) {
+    const parts = n.split(',').map((x) => x.trim()).filter(Boolean);
+    if (parts.length >= 2 && parts[1]) return parts[1];
+  }
+  return n;
 }
 
 function extractAllEmails(headerValue) {
@@ -279,7 +292,8 @@ function plainToHtml(text) {
 }
 
 async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, signatureHtml, recipientName }) {
-  const greet = recipientName ? `Hi ${recipientName},` : 'Hi,';
+  const greetName = nameForGreeting(recipientName);
+  const greet = greetName ? `Hi ${greetName},` : 'Hi,';
   const prompt = [
     'You are an assistant drafting a reply email for a busy professional.',
     'Requirements:',
