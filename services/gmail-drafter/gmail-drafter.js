@@ -157,6 +157,54 @@ function addressedToMe(msg) {
   return false;
 }
 
+async function addressedToMeByApi(messageId) {
+  const allowed = new Set([
+    WORK_ACCOUNT.toLowerCase(),
+    FROM_ALIAS.toLowerCase(),
+    ...WORK_RECIPIENTS,
+  ]);
+
+  const meta = await execFile(GOG_BIN, [
+    '--client', GOG_CLIENT,
+    '--account', WORK_ACCOUNT,
+    'gmail', 'get', messageId,
+    '--format', 'metadata',
+    '--plain',
+  ]);
+
+  // Plain output is TSV like: key\tvalue
+  const lines = String(meta.out || '').split('\n');
+  const keys = new Map();
+  for (const line of lines) {
+    const idx = line.indexOf('\t');
+    if (idx === -1) continue;
+    const k = line.slice(0, idx).trim();
+    const v = line.slice(idx + 1).trim();
+    if (!k) continue;
+    keys.set(k, v);
+  }
+
+  const candidates = [
+    keys.get('to'),
+    keys.get('cc'),
+    keys.get('bcc'),
+    keys.get('delivered_to'),
+    keys.get('deliveredTo'),
+    keys.get('delivered-to'),
+    keys.get('delivered_to_email'),
+  ];
+
+  for (const c of candidates) {
+    for (const e of extractAllEmails(c || '')) {
+      if (allowed.has(e)) return true;
+    }
+    const one = extractEmail(c || '').toLowerCase();
+    if (one && allowed.has(one)) return true;
+  }
+
+  return false;
+}
+
 function logLine(obj) {
   try {
     // eslint-disable-next-line no-console
@@ -524,8 +572,17 @@ async function processQueue() {
         continue;
       }
       if (!addressedToMe(msg)) {
-        logLine({ event: 'skipped', skipped: [{ fromEmail, subj, reason: 'not_addressed_to_me', to: msg.to, cc: msg.cc, bcc: msg.bcc, deliveredTo: msg.deliveredTo || msg.delivered_to }] });
-        continue;
+        // Fallback: sometimes watch payload truncates headers. Confirm via Gmail metadata.
+        let ok = false;
+        try {
+          ok = await addressedToMeByApi(msg.id);
+        } catch (e) {
+          logLine({ event: 'error', where: 'addressedToMeByApi', messageId: msg.id, error: String(e && e.message ? e.message : e) });
+        }
+        if (!ok) {
+          logLine({ event: 'skipped', skipped: [{ fromEmail, subj, reason: 'not_addressed_to_me', to: msg.to, cc: msg.cc, bcc: msg.bcc, deliveredTo: msg.deliveredTo || msg.delivered_to }] });
+          continue;
+        }
       }
       if (looksLikeBroadcast(msg)) {
         try {
