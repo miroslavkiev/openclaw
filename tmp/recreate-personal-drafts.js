@@ -57,6 +57,21 @@ function extractDisplayName(addr) {
   return name;
 }
 
+function extractAllEmails(headerValue) {
+  const s = String(headerValue || '');
+  const out = new Set();
+  for (const m of s.matchAll(/<([^>]+)>/g)) {
+    out.add(String(m[1] || '').trim().toLowerCase());
+  }
+  for (const part of s.split(/[,;]+/)) {
+    const t = part.trim();
+    if (!t) continue;
+    const cleaned = t.replace(/^"|"$/g, '').trim();
+    if (cleaned.includes('@') && !cleaned.includes(' ')) out.add(cleaned.toLowerCase());
+  }
+  return Array.from(out).filter(Boolean);
+}
+
 function extractTextPlain(payload) {
   if (!payload) return '';
   if (payload.mimeType === 'text/plain' && payload.body && payload.body.data) return b64urlDecode(payload.body.data);
