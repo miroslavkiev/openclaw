@@ -482,8 +482,8 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, si
     '--session-id', `gmail-drafter:${replyToMessageId}`,
     '--message', prompt,
     '--json',
-    '--timeout', '120',
-  ], 150000);
+    '--timeout', '180',
+  ], 300000);
 
   const res = JSON.parse(out || '{}');
   const text = (res.payloads && res.payloads[0] && res.payloads[0].text) ? res.payloads[0].text : '';
