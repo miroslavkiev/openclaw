@@ -155,6 +155,33 @@ function looksLikeBroadcast(msg) {
   return false;
 }
 
+function looksLikeCalendarNotification(msg) {
+  const from = String(msg.from || '').toLowerCase();
+  const subj = String(msg.subject || '').toLowerCase();
+  const snippet = String(msg.snippet || '').toLowerCase();
+
+  // Common Google Calendar senders
+  if (from.includes('calendar-notification@google.com')) return true;
+  if (from.includes('calendar@google.com')) return true;
+
+  // Subject patterns for calendar-generated messages
+  if (subj.startsWith('invitation:')) return true;
+  if (subj.startsWith('updated invitation:')) return true;
+  if (subj.startsWith('cancelled event:')) return true;
+  if (subj.startsWith('canceled event:')) return true;
+  if (subj.startsWith('cancelled event with note:')) return true;
+  if (subj.startsWith('canceled event with note:')) return true;
+
+  // Body/snippet markers that appear in calendar updates/cancellations
+  if (snippet.includes('invitation from google calendar')) return true;
+  if (snippet.includes('this event has been cancelled and removed from your calendar')) return true;
+  if (snippet.includes('this event has been canceled and removed from your calendar')) return true;
+  if (snippet.includes('join with google meet')) return true;
+  if (snippet.includes('you are receiving this email because you are subscribed')) return true;
+
+  return false;
+}
+
 function addressedToMe(msg) {
   // gog payload may include only some headers depending on mode; be defensive.
   const headerCandidates = [msg.to, msg.cc, msg.bcc, msg.deliveredTo, msg.delivered_to, msg.recipient, msg.recipientEmail];
@@ -474,6 +501,16 @@ function plainToHtml(text) {
   return `<div dir="ltr">${paras.join('')}</div>`;
 }
 
+function ensureKindRegards(text) {
+  const s = String(text || '').trim();
+  if (!s) return s;
+  // Always include "Kind regards," before the HTML signature (signature is appended separately).
+  // If it's already present near the end, leave it.
+  const tail = s.slice(-200).toLowerCase();
+  if (tail.includes('kind regards,')) return s;
+  return s + '\n\nKind regards,';
+}
+
 async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, signatureHtml, recipientName }) {
   const displayName = String(recipientName || '').trim();
   const prompt = [
@@ -522,7 +559,7 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, si
     res && res.output && res.output.text,
   ];
   const text = candidates.find((x) => typeof x === 'string' && x.trim()) || '';
-  const cleaned = String(text || '').trim();
+  let cleaned = String(text || '').trim();
 
   if (!cleaned) {
     logLine({
@@ -537,6 +574,8 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, si
     });
     throw new Error('LLM returned empty draft');
   }
+
+  cleaned = ensureKindRegards(cleaned);
 
   const bodyHtml = plainToHtml(cleaned);
 
@@ -632,6 +671,12 @@ async function processQueue() {
           logLine({ event: 'error', where: 'label_mass', messageId: msg.id, error: String(e && e.message ? e.message : e) });
         }
         logLine({ event: 'skipped', skipped: [{ fromEmail, subj, reason: 'looks_like_broadcast', to: msg.to, cc: msg.cc }] });
+        continue;
+      }
+
+      // Skip Google Calendar notifications (invites/updates/cancellations) - we don't want reply drafts for those.
+      if (looksLikeCalendarNotification(msg)) {
+        logLine({ event: 'skipped', skipped: [{ fromEmail, subj, reason: 'calendar_notification', to: msg.to, cc: msg.cc }] });
         continue;
       }
 
