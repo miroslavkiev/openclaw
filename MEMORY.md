@@ -9,5 +9,5 @@
     - Always include the closing line `Kind regards,` immediately before the appended HTML signature (the model output should not contain the signature).
     - There must be exactly one blank line before `Kind regards,`.
     - After `Kind regards,` there must be exactly one line break before the signature (no extra blank line).
-    - Include quoted previous message content at the bottom (Gmail-like quote block) when replying.
+    - Include quoted previous message content at the bottom (Gmail-like quote block) when replying. If the original email contains inline images (cid:), strip <img> tags in the quote to avoid Gmail rendering issues.
 - If an LLM result appears empty, prefer investigating parsing/schema issues and logging over generating a fallback email body.
