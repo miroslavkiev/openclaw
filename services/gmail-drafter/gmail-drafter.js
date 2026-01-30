@@ -484,21 +484,51 @@ function plainToHtml(text) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+
+  // Gmail drafts should render bullets as real <ul><li> lists, not plain text.
+  // We also keep newlines as <br> to control spacing (esp. around Kind regards,).
   const lines = String(text || '').split(/\r?\n/);
-  const paras = [];
-  let buf = [];
-  for (const line of lines) {
-    if (!line.trim()) {
-      if (buf.length) {
-        paras.push(`<p>${esc(buf.join(' '))}</p>`);
-        buf = [];
-      }
+
+  const out = [];
+  out.push('<div dir="ltr">');
+
+  let inList = false;
+  const closeList = () => {
+    if (inList) {
+      out.push('</ul>');
+      inList = false;
+    }
+  };
+
+  for (const raw of lines) {
+    const line = String(raw || '');
+    const trimmed = line.trim();
+
+    // blank line
+    if (!trimmed) {
+      closeList();
+      out.push('<br>');
       continue;
     }
-    buf.push(line.trim());
+
+    const m = trimmed.match(/^([-*])\s+(.*)$/);
+    if (m) {
+      const item = m[2] || '';
+      if (!inList) {
+        out.push('<ul style="margin:0;padding-left:1.2em;">');
+        inList = true;
+      }
+      out.push(`<li>${esc(item)}</li>`);
+      continue;
+    }
+
+    closeList();
+    out.push(`${esc(trimmed)}<br>`);
   }
-  if (buf.length) paras.push(`<p>${esc(buf.join(' '))}</p>`);
-  return `<div dir="ltr">${paras.join('')}</div>`;
+
+  closeList();
+  out.push('</div>');
+  return out.join('');
 }
 
 function ensureKindRegards(text) {
@@ -584,10 +614,10 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, si
   let quoteHtml = '';
   try {
     const full = await getMessageFull(replyToMessageId);
-    const headers = full.headers || {};
     const payload = full.message && full.message.payload ? full.message.payload : null;
+    const headers = payload && Array.isArray(payload.headers) ? payload.headers : (full.headers || []);
     const quotedHtml = extractTextHtml(payload);
-    const bodyText = full.body || extractTextPlain(payload) || '';
+    const bodyText = extractTextPlain(payload) || (full.message && full.message.snippet ? full.message.snippet : '') || '';
 
     // Use HTML quote when possible (preserves Outlook tables). Fallback to plain text.
     quoteHtml = buildGmailQuoteHtml({ headers, quotedHtml: quotedHtml || '', bodyText });
@@ -597,7 +627,9 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, si
   }
 
   // Exactly one visual blank line before signature:
-  let fullHtml = bodyHtml.replace(/<\/div>$/, '') + '<br>' + '</div>' + '\n' + signatureHtml;
+  // Signature must follow Kind regards, with exactly one line break.
+  // plainToHtml() ends with </div> and already uses <br> for line breaks.
+  let fullHtml = bodyHtml.replace(/<\/div>$/, '<br></div>') + '\n' + signatureHtml;
   if (quoteHtml) fullHtml += '\n' + quoteHtml;
 
   const args = [

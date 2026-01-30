@@ -73,21 +73,47 @@ function plainToHtml(text) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+
   const lines = String(text || '').split(/\r?\n/);
-  const paras = [];
-  let buf = [];
-  for (const line of lines) {
-    if (!line.trim()) {
-      if (buf.length) {
-        paras.push(`<p>${esc(buf.join(' '))}</p>`);
-        buf = [];
-      }
+  const out = [];
+  out.push('<div dir="ltr">');
+
+  let inList = false;
+  const closeList = () => {
+    if (inList) {
+      out.push('</ul>');
+      inList = false;
+    }
+  };
+
+  for (const raw of lines) {
+    const line = String(raw || '');
+    const trimmed = line.trim();
+
+    if (!trimmed) {
+      closeList();
+      out.push('<br>');
       continue;
     }
-    buf.push(line.trim());
+
+    const m = trimmed.match(/^([-*])\s+(.*)$/);
+    if (m) {
+      const item = m[2] || '';
+      if (!inList) {
+        out.push('<ul style="margin:0;padding-left:1.2em;">');
+        inList = true;
+      }
+      out.push(`<li>${esc(item)}</li>`);
+      continue;
+    }
+
+    closeList();
+    out.push(`${esc(trimmed)}<br>`);
   }
-  if (buf.length) paras.push(`<p>${esc(buf.join(' '))}</p>`);
-  return `<div dir="ltr">${paras.join('')}</div>`;
+
+  closeList();
+  out.push('</div>');
+  return out.join('');
 }
 
 async function getWorkSignatureHtml() {
@@ -201,7 +227,7 @@ async function draftWithLlm({ to, subject, replyToMessageId, contextText, recipi
 
   const signatureHtml = await getWorkSignatureHtml();
   const bodyHtml = plainToHtml(withClosing);
-  let fullHtml = bodyHtml.replace(/<\/div>$/, '') + '<br></div>\n' + signatureHtml;
+  let fullHtml = bodyHtml.replace(/<\/div>$/, '<br></div>') + '\n' + signatureHtml;
 
   await execFile(GOG, [
     '--client', CLIENT,
