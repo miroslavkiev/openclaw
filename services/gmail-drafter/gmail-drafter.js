@@ -640,7 +640,8 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, si
   // Signature must follow Kind regards, with exactly one line break.
   // plainToHtml() already renders line breaks as <br>, so just append the signature.
   let fullHtml = bodyHtml + '\n' + signatureHtml;
-  if (quoteHtml) fullHtml += '\n' + quoteHtml;
+  // Always append quote block if we managed to build one.
+  if (quoteHtml && String(quoteHtml).trim()) fullHtml += '\n' + quoteHtml;
 
   const args = [
     '--client', GOG_CLIENT,
