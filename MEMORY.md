@@ -21,6 +21,10 @@
   - LaunchAgent: `com.mk.gmail-drafter` (listens on 127.0.0.1:18990, path `/gmail-work`)
   - Watcher: `com.mk.gog.gmail-work-serve` (gog watch serve -> hook-url http://127.0.0.1:18990/gmail-work)
   - Behavior: auto-draft for eligible inbound work emails; reply-to-all mode (preserve CC), no WhatsApp pings.
+  - Visibility: after classification, apply Gmail labels to the thread:
+    - `personal` for non-broadcast emails (draft eligible)
+    - `mass` for broadcast or mass mail (draft skipped)
+    - Create labels on demand if missing.
   - Implementation note: webhook ACKs immediately and processes draft creation asynchronously (background queue) to avoid `gog watch serve` hook timeout ("context canceled").
   - Quoted thread: drafts include a gmail_quote block below signature. For Outlook emails (tables), we must extract the quoted HTML from `gog gmail get --format full` (not --format raw) because raw omits payload parts.
 
