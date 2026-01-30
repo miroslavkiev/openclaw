@@ -15,3 +15,13 @@
 - Gmail drafter reliability:
   - Retry draft creation a few times with backoff on failures.
   - On failure, apply a `draft_failed` label and append a JSONL error record to `logs/gmail-drafter-errors.jsonl`.
+
+## Dual GOG Gmail watch (work + personal)
+- We run two parallel `gog gmail watch serve` instances (Pub/Sub push receivers):
+  - personal: 127.0.0.1:8788 (gmail-personal.kravchen.com)
+  - work: 127.0.0.1:8789 (gmail-work.kravchen.com)
+- Managed via macOS LaunchAgents:
+  - com.mk.gog.gmail-personal-serve (+ renew)
+  - com.mk.gog.gmail-work-serve (+ renew)
+  - com.mk.gmail-drafter (work drafts) on 127.0.0.1:18990/gmail-work
+- Full operational details: memory/gog-dual-gmail-watch-setup.md
