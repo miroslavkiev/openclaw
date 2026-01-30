@@ -25,6 +25,7 @@ const FROM_ALIAS = process.env.FROM_ALIAS || 'myroslav.kravchenko@ciklum.com';
 // Gmail labels used to mark classification outcome (created on demand)
 const LABEL_PERSONAL = process.env.LABEL_PERSONAL || 'personal';
 const LABEL_MASS = process.env.LABEL_MASS || 'mass';
+const LABEL_DRAFT_FAILED = process.env.LABEL_DRAFT_FAILED || 'draft_failed';
 
 function json(res, code, obj) {
   const body = Buffer.from(JSON.stringify(obj));
@@ -251,6 +252,17 @@ function logLine(obj) {
   }
 }
 
+function appendJsonl(filePath, obj) {
+  try {
+    const fs = require('fs');
+    const line = JSON.stringify({ ts: new Date().toISOString(), ...obj }) + '\n';
+    fs.mkdirSync(require('path').dirname(filePath), { recursive: true });
+    fs.appendFileSync(filePath, line, 'utf8');
+  } catch {
+    // ignore
+  }
+}
+
 function b64urlDecode(s) {
   if (!s) return '';
   const pad = '='.repeat((4 - (s.length % 4)) % 4);
@@ -329,6 +341,19 @@ async function addLabelByMessageId(messageId, labelName) {
     '--account', WORK_ACCOUNT,
     'gmail', 'labels', 'modify', threadId,
     '--add', String(labelName || '').trim(),
+  ]);
+}
+
+async function removeLabelByMessageId(messageId, labelName) {
+  const threadId = await getThreadIdForMessage(messageId);
+  if (!threadId) return;
+
+  await ensureLabelExists(labelName);
+  await execFile(GOG_BIN, [
+    '--client', GOG_CLIENT,
+    '--account', WORK_ACCOUNT,
+    'gmail', 'labels', 'modify', threadId,
+    '--remove', String(labelName || '').trim(),
   ]);
 }
 
@@ -572,9 +597,10 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, si
     'Return ONLY the email body text (no subject line, no signature).',
   ].join('\n');
 
+  // Use a unique session id per run to avoid session lock contention.
   const { out } = await execFile(CLAWDBOT_BIN, [
     'agent',
-    '--session-id', `gmail-drafter:${replyToMessageId}`,
+    '--session-id', `gmail-drafter:${replyToMessageId}:${Date.now()}`,
     '--message', prompt,
     '--json',
     '--timeout', '180',
@@ -759,19 +785,43 @@ async function processQueue() {
         const signatureHtml = await getWorkSignatureHtml();
         const recipientName = extractDisplayName(fromHdr) || extractDisplayName(msg.from || '');
 
-        await draftWithLlm({
-          to: baseTo.join(','),
-          cc: baseCc.join(','),
-          subject: replySubject,
-          replyToMessageId: msg.id,
-          contextText,
-          signatureHtml,
-          recipientName,
-        });
+        const maxAttempts = 3;
+        let lastErr;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          try {
+            await draftWithLlm({
+              to: baseTo.join(','),
+              cc: baseCc.join(','),
+              subject: replySubject,
+              replyToMessageId: msg.id,
+              contextText,
+              signatureHtml,
+              recipientName,
+            });
+            lastErr = null;
+            break;
+          } catch (err) {
+            lastErr = err;
+            // Backoff: 1s, 3s, 7s
+            const delayMs = attempt === 1 ? 1000 : (attempt === 2 ? 3000 : 7000);
+            logLine({ event: 'warn', where: 'draft_retry', messageId: msg.id, attempt, maxAttempts, delayMs, error: String(err && err.message ? err.message : err) });
+            if (attempt < maxAttempts) await new Promise((r) => setTimeout(r, delayMs));
+          }
+        }
+        if (lastErr) throw lastErr;
+
+        // Clear failure marker if it was set before.
+        try { await removeLabelByMessageId(msg.id, LABEL_DRAFT_FAILED); } catch {}
 
         logLine({ event: 'draft_created', fromEmail, subject: replySubject, replyTo: msg.id, mode: 'llm' });
       } catch (e) {
-        logLine({ event: 'error', where: 'process_message', messageId: msg.id, error: String(e && e.message ? e.message : e) });
+        const errText = String(e && e.message ? e.message : e);
+        logLine({ event: 'error', where: 'process_message', messageId: msg.id, error: errText });
+        appendJsonl('/Users/mk/clawd/logs/gmail-drafter-errors.jsonl', { where: 'process_message', messageId: msg.id, fromEmail, subject: subj, error: errText });
+        try {
+          await addLabelByMessageId(msg.id, LABEL_DRAFT_FAILED);
+          logLine({ event: 'labeled', messageId: msg.id, label: LABEL_DRAFT_FAILED, kind: 'draft_failed' });
+        } catch {}
       }
     }
   } finally {
