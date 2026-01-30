@@ -74,6 +74,24 @@ function nameForGreeting(displayName) {
   return n;
 }
 
+function extractFirstName(displayName) {
+  const greetingName = nameForGreeting(displayName);
+  if (!greetingName) return '';
+  // Remove bracketed parts and extra whitespace
+  const cleaned = String(greetingName)
+    .replace(/\([^)]*\)/g, ' ')
+    .replace(/\[[^\]]*\]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!cleaned) return '';
+  // Pick first token that looks like a name (avoid single-letter initials)
+  const token = cleaned.split(' ')[0] || '';
+  if (!token) return '';
+  if (token.length === 1) return '';
+  // Common cases: "Ram." -> "Ram"
+  return token.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ'’-]+/g, '').replace(/[’–—-]/g, "'").trim();
+}
+
 function extractAllEmails(headerValue) {
   const s = String(headerValue || '');
   const out = new Set();
@@ -487,8 +505,22 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, si
 
   const res = JSON.parse(out || '{}');
   const text = (res.payloads && res.payloads[0] && res.payloads[0].text) ? res.payloads[0].text : '';
-  const cleaned = String(text || '').trim();
-  if (!cleaned) throw new Error('LLM returned empty draft');
+  let cleaned = String(text || '').trim();
+
+  // Safety net: occasionally the agent returns an empty payload (timeouts, routing issues,
+  // or overly-strict output constraints). In that case, still create a draft with a
+  // minimal, polite clarification request instead of failing the whole pipeline.
+  if (!cleaned) {
+    const first = extractFirstName(displayName);
+    cleaned = [
+      first ? `Hi ${first},` : 'Hi,',
+      '',
+      'I saw the calendar update. Could you please confirm the new proposed time for the prep call?',
+      '',
+      'Kind regards,',
+    ].join('\n');
+    logLine({ event: 'warn', where: 'draftWithLlm', messageId: replyToMessageId, error: 'LLM returned empty draft - used fallback' });
+  }
 
   const bodyHtml = plainToHtml(cleaned);
 
