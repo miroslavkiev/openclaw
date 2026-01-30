@@ -178,7 +178,7 @@ async function getMessageFull(messageId) {
   return JSON.parse(out || '{}');
 }
 
-async function draftWithLlm({ to, subject, replyToMessageId, contextText, recipientName }) {
+async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, recipientName }) {
   const displayName = String(recipientName || '').trim();
   const prompt = [
     'You are an assistant drafting a reply email for a busy professional.',
@@ -222,14 +222,14 @@ async function draftWithLlm({ to, subject, replyToMessageId, contextText, recipi
   const cleaned = String(text || '').trim();
   if (!cleaned) throw new Error('Empty LLM output');
 
-  // Ensure closing line before signature
-  const withClosing = cleaned.toLowerCase().includes('kind regards,') ? cleaned : (cleaned + '\n\nKind regards,');
+  // Ensure closing line before signature (no extra blank line)
+  const withClosing = cleaned.toLowerCase().includes('kind regards,') ? cleaned : (cleaned + '\nKind regards,');
 
   const signatureHtml = await getWorkSignatureHtml();
   const bodyHtml = plainToHtml(withClosing);
-  let fullHtml = bodyHtml.replace(/<\/div>$/, '<br></div>') + '\n' + signatureHtml;
+  let fullHtml = bodyHtml + '\n' + signatureHtml;
 
-  await execFile(GOG, [
+  const args = [
     '--client', CLIENT,
     '--account', ACCOUNT,
     'gmail', 'drafts', 'create',
@@ -238,7 +238,10 @@ async function draftWithLlm({ to, subject, replyToMessageId, contextText, recipi
     '--from', FROM_ALIAS,
     '--body-html', fullHtml,
     '--reply-to-message-id', replyToMessageId,
-  ], 120000);
+  ];
+  if (cc) args.push('--cc', cc);
+
+  await execFile(GOG, args, 120000);
 }
 
 function looksLikeCalendarNotification({ from, subject, snippet }) {
@@ -320,12 +323,27 @@ async function main() {
     await deleteDraftsForThread(threadId);
 
     const replySubject = subj.toLowerCase().startsWith('re:') ? subj : `Re: ${subj}`;
-    const fromEmail = extractEmail(from);
-    const recipientName = extractDisplayName(from);
 
+    // Reply-to-all recipients from full headers
+    const toHdr = pickHeader(headers, 'To');
+    const ccHdr = pickHeader(headers, 'Cc');
+
+    const myAddrs = new Set([
+      ACCOUNT.toLowerCase(),
+      FROM_ALIAS.toLowerCase(),
+    ]);
+
+    const uniq = (arr) => Array.from(new Set(arr.map((x) => String(x || '').trim().toLowerCase()).filter(Boolean)));
+
+    const fromEmail = extractEmail(from).toLowerCase();
+    const toAddrs = uniq([fromEmail, ...extractAllEmails(toHdr)]).filter((e) => e && !myAddrs.has(e));
+    const ccAddrs = uniq([...extractAllEmails(ccHdr)]).filter((e) => e && !myAddrs.has(e) && !toAddrs.includes(e));
+
+    const recipientName = extractDisplayName(from);
     const contextText = await getThreadContextText(id, 8);
     await draftWithLlm({
-      to: fromEmail,
+      to: toAddrs.join(','),
+      cc: ccAddrs.join(','),
       subject: replySubject,
       replyToMessageId: id,
       contextText,

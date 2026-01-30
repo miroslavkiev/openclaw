@@ -449,10 +449,20 @@ function buildGmailQuoteHtml({ headers, quotedHtml, bodyText }) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 
-  const h = headers || {};
-  const from = h.from || '';
-  const date = h.date || '';
-  const subj = h.subject || '';
+  // Accept either an object {from,date,subject} or a Gmail headers array.
+  let from = '';
+  let date = '';
+  let subj = '';
+  if (Array.isArray(headers)) {
+    from = pickHeader(headers, 'From');
+    date = pickHeader(headers, 'Date');
+    subj = pickHeader(headers, 'Subject');
+  } else {
+    const h = headers || {};
+    from = h.from || '';
+    date = h.date || '';
+    subj = h.subject || '';
+  }
 
   const attrBits = [];
   if (date) attrBits.push(date);
@@ -535,10 +545,10 @@ function ensureKindRegards(text) {
   const s = String(text || '').trim();
   if (!s) return s;
   // Always include "Kind regards," before the HTML signature (signature is appended separately).
-  // If it's already present near the end, leave it.
+  // Do NOT add an extra blank line - we want exactly one line break before the signature.
   const tail = s.slice(-200).toLowerCase();
   if (tail.includes('kind regards,')) return s;
-  return s + '\n\nKind regards,';
+  return s + '\nKind regards,';
 }
 
 async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, signatureHtml, recipientName }) {
@@ -628,8 +638,8 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, si
 
   // Exactly one visual blank line before signature:
   // Signature must follow Kind regards, with exactly one line break.
-  // plainToHtml() ends with </div> and already uses <br> for line breaks.
-  let fullHtml = bodyHtml.replace(/<\/div>$/, '<br></div>') + '\n' + signatureHtml;
+  // plainToHtml() already renders line breaks as <br>, so just append the signature.
+  let fullHtml = bodyHtml + '\n' + signatureHtml;
   if (quoteHtml) fullHtml += '\n' + quoteHtml;
 
   const args = [
@@ -723,28 +733,34 @@ async function processQueue() {
       try {
         const replySubject = subj.toLowerCase().startsWith('re:') ? subj : `Re: ${subj}`;
 
-        // Reply-to-all mode:
+        // Reply-to-all mode: derive recipients from the full Gmail message headers (more reliable than webhook payload).
         const myAddrs = new Set([
           WORK_ACCOUNT.toLowerCase(),
           FROM_ALIAS.toLowerCase(),
           ...WORK_RECIPIENTS,
         ]);
         const uniq = (arr) => Array.from(new Set(arr.map((x) => String(x || '').trim().toLowerCase()).filter(Boolean)));
-        const toAddrs = uniq([
-          fromEmail,
-          ...extractAllEmails(msg.to || ''),
-        ]).filter((e) => !myAddrs.has(e));
-        const ccAddrs = uniq([
-          ...extractAllEmails(msg.cc || ''),
-        ]).filter((e) => !myAddrs.has(e));
+
+        const fullMsg = await getMessageFull(msg.id);
+        const headers = fullMsg && fullMsg.message && fullMsg.message.payload && Array.isArray(fullMsg.message.payload.headers)
+          ? fullMsg.message.payload.headers
+          : [];
+
+        const toHdr = pickHeader(headers, 'To');
+        const ccHdr = pickHeader(headers, 'Cc');
+        const fromHdr = pickHeader(headers, 'From') || msg.from || '';
+        const fromEmail2 = extractEmail(fromHdr).toLowerCase() || fromEmail;
+
+        const baseTo = uniq([fromEmail2, ...extractAllEmails(toHdr)]).filter((e) => !myAddrs.has(e));
+        const baseCc = uniq([...extractAllEmails(ccHdr)]).filter((e) => !myAddrs.has(e) && !baseTo.includes(e));
 
         const contextText = await getThreadContextText(msg.id, 8);
         const signatureHtml = await getWorkSignatureHtml();
-        const recipientName = extractDisplayName(msg.from || '') || extractDisplayName(pickHeader((msg.headers || []), 'From'));
+        const recipientName = extractDisplayName(fromHdr) || extractDisplayName(msg.from || '');
 
         await draftWithLlm({
-          to: toAddrs.join(','),
-          cc: ccAddrs.join(','),
+          to: baseTo.join(','),
+          cc: baseCc.join(','),
           subject: replySubject,
           replyToMessageId: msg.id,
           contextText,
