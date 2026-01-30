@@ -25,3 +25,27 @@
   - com.mk.gog.gmail-work-serve (+ renew)
   - com.mk.gmail-drafter (work drafts) on 127.0.0.1:18990/gmail-work
 - Full operational details: memory/gog-dual-gmail-watch-setup.md (includes Cloudflare Tunnel hostnames/endpoints + double NAT note)
+
+## Google Chat (OpenClaw) setup via Cloudflare Tunnel
+- Plugin: bundled `@openclaw/googlechat` (enable via `openclaw plugins enable googlechat`).
+- Cloudflare Tunnel service runs as root LaunchDaemon `system/com.cloudflare.cloudflared` and reads config from `/etc/cloudflared/config.yml` (not `/opt/homebrew/etc/cloudflared/config.yml`).
+- Ingress mapping:
+  - `googlechat.kravchen.com` -> `http://localhost:18789` (OpenClaw gateway).
+  - Webhook path: `/googlechat`.
+- OpenClaw config (single account): `channels.googlechat`:
+  - `serviceAccountFile`: `/Users/mk/.openclaw/credentials/service_account_googlechat.json`
+  - `audienceType`: `app-url`
+  - `audience`: `https://googlechat.kravchen.com/googlechat`
+  - `webhookPath`: `/googlechat`
+  - DM policy: normally `allowlist` (temporarily used `open` for debugging).
+- GCP:
+  - Project: `noble-catcher-485620-a5`.
+  - Service account created for OpenClaw Chat: `openclaw-googlechat@noble-catcher-485620-a5.iam.gserviceaccount.com`.
+  - Key file: `/Users/mk/.openclaw/credentials/service_account_googlechat.json`.
+  - After configuring Chat API app in Google Cloud Console, `openclaw channels status --probe` reports Google Chat: `works`.
+- Validation checks:
+  - `openclaw channels status --probe` should show Google Chat `works`.
+  - `curl -i -X POST https://googlechat.kravchen.com/googlechat ...` should return `400` for dummy payload (means routing OK).
+- Restarts:
+  - Cloudflare tunnel: `sudo launchctl kickstart -k system/com.cloudflare.cloudflared`
+  - OpenClaw gateway (LaunchAgent): `launchctl kickstart -k gui/$(id -u)/ai.openclaw.gateway`
