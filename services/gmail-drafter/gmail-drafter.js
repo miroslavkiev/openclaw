@@ -164,34 +164,26 @@ async function addressedToMeByApi(messageId) {
     ...WORK_RECIPIENTS,
   ]);
 
-  const meta = await execFile(GOG_BIN, [
+  // Use full format to reliably access headers like Cc and Delivered-To.
+  const { out } = await execFile(GOG_BIN, [
     '--client', GOG_CLIENT,
     '--account', WORK_ACCOUNT,
     'gmail', 'get', messageId,
-    '--format', 'metadata',
-    '--plain',
-  ]);
+    '--format', 'full',
+    '--json',
+  ], 120000);
 
-  // Plain output is TSV like: key\tvalue
-  const lines = String(meta.out || '').split('\n');
-  const keys = new Map();
-  for (const line of lines) {
-    const idx = line.indexOf('\t');
-    if (idx === -1) continue;
-    const k = line.slice(0, idx).trim();
-    const v = line.slice(idx + 1).trim();
-    if (!k) continue;
-    keys.set(k, v);
-  }
+  const obj = JSON.parse(out || '{}');
+  const headers = (obj.message && obj.message.payload && Array.isArray(obj.message.payload.headers))
+    ? obj.message.payload.headers
+    : [];
 
   const candidates = [
-    keys.get('to'),
-    keys.get('cc'),
-    keys.get('bcc'),
-    keys.get('delivered_to'),
-    keys.get('deliveredTo'),
-    keys.get('delivered-to'),
-    keys.get('delivered_to_email'),
+    pickHeader(headers, 'To'),
+    pickHeader(headers, 'Cc'),
+    pickHeader(headers, 'Bcc'),
+    pickHeader(headers, 'Delivered-To'),
+    pickHeader(headers, 'X-Original-To'),
   ];
 
   for (const c of candidates) {
