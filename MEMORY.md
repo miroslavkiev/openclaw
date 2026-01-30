@@ -1,51 +1,12 @@
 # MEMORY.md
 
-## Identity & preferences
-- Name: Myroslav Kravchenko (go by: Myroslav)
-- Timezone: Europe/Berlin
-- Language preference: Ukrainian
-- Formatting preference: use hyphen (-), minimal/no emojis
-- Style: be accurate; ask if unsure; avoid guessing
-- Brand style: “adidas” always lowercase
-
-## Family
-- Wife: Люсі (Lucy) — email: Luisiya@gmail.com
-- Address (allowed to store): Karolinenstraße 128, 90763 Fürth
-
-## Email automation (current)
-- Gmail push via Cloudflare + Pub/Sub + `gog watch serve` -> local drafter.
-- No WhatsApp notifications for auto-drafts.
-- Work mailbox auto-draft rules saved in: `memory/work-email-auto-drafter-rules.md`.
-- Local drafter service:
-  - Code: `services/gmail-drafter/gmail-drafter.js`
-  - LaunchAgent: `com.mk.gmail-drafter` (listens on 127.0.0.1:18990, path `/gmail-work`)
-  - Watcher: `com.mk.gog.gmail-work-serve` (gog watch serve -> hook-url http://127.0.0.1:18990/gmail-work)
-  - Behavior: auto-draft for eligible inbound work emails; reply-to-all mode (preserve CC), no WhatsApp pings.
-  - Visibility: after classification, apply Gmail labels to the thread:
-    - `personal` for non-broadcast emails (draft eligible)
-    - `mass` for broadcast or mass mail (draft skipped)
-    - Create labels on demand if missing.
-  - Implementation note: webhook ACKs immediately and processes draft creation asynchronously (background queue) to avoid `gog watch serve` hook timeout ("context canceled").
-  - Quoted thread: drafts include a gmail_quote block below signature. For Outlook emails (tables), we must extract the quoted HTML from `gog gmail get --format full` (not --format raw) because raw omits payload parts.
-
-## Privacy note
-- Do not store sensitive personal data (DOB, full address, residence permit details) unless explicitly requested.
-
-## Communication preference
-- Prefer very friendly, professional, polite replies; always consider prior thread context.
-- Avoid em-dash; use hyphen (-).
-- Email wording conventions:
-  - Start with "Hi" (not "Hello").
-  - End message text with "Kind regards,".
-
-## Working preference (internal)
-- When I create or modify any automation, script, LaunchAgent, cron job, or service, I should proactively update memory (daily log and, if long-lived, MEMORY.md) without waiting for a reminder.
-
-## Email drafting - gog (important)
-- Accounts available in gog auth:
-  - Work: krmy@ciklum.com
-  - Personal: kravch@gmail.com
-- Default behavior: when user requests an email reply (thread context provided), create a Gmail draft automatically via `gog` unless they explicitly ask for text-only.
-- For work drafts, send-as to use: myroslav.kravchenko@ciklum.com
-- Signature rule: message text should be generated without the signature, and the official HTML signature must be appended only when creating/updating the draft via API.
-- Formatting rule: keep only one line break between "Kind regards," and the signature HTML.
+## Email drafting (Gmail drafter)
+- Do not create reply drafts for Google Calendar notification emails (invites, updates, cancellations). Detect via sender (calendar@google.com / calendar-notification@google.com) and common subject/snippet markers like "Invitation:", "Updated invitation:", "Cancelled/Canceled event" and "Invitation from Google Calendar".
+- Draft requirements:
+  - Always draft as Reply-To-All: include original To recipients (excluding my own addresses) plus the sender in To, and keep original Cc (excluding my own) in Cc.
+  - Formatting:
+    - Render bullet lines ("- item" or "* item") as real HTML lists (<ul><li>), not plain text.
+    - Always include the closing line `Kind regards,` immediately before the appended HTML signature (the model output should not contain the signature).
+    - After `Kind regards,` there must be exactly one line break before the signature (no extra blank line).
+    - Include quoted previous message content at the bottom (Gmail-like quote block) when replying.
+- If an LLM result appears empty, prefer investigating parsing/schema issues and logging over generating a fallback email body.
