@@ -83,6 +83,81 @@ function extractTextPlain(payload) {
   return '';
 }
 
+function extractTextHtml(payload) {
+  if (!payload) return '';
+  if (payload.mimeType === 'text/html' && payload.body && payload.body.data) return b64urlDecode(payload.body.data);
+  const parts = payload.parts || [];
+  for (const p of parts) {
+    const t = extractTextHtml(p);
+    if (t) return t;
+  }
+  return '';
+}
+
+function sanitizeQuotedHtml(html) {
+  let s = String(html || '');
+  const bodyMatch = s.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  if (bodyMatch) s = bodyMatch[1];
+
+  s = s.replace(/<head[^>]*>[\s\S]*?<\/head>/gi, '');
+  s = s.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+  s = s.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+  s = s.replace(/<meta[^>]*>/gi, '');
+  s = s.replace(/<link[^>]*>/gi, '');
+  s = s.replace(/<title[^>]*>[\s\S]*?<\/title>/gi, '');
+
+  // Inline images (cid:) sometimes don't render in quotes - drop them to keep the quote visible.
+  s = s.replace(/<img[^>]*>/gi, '');
+
+  s = s.replace(/<\/?html[^>]*>/gi, '');
+  s = s.replace(/<\/?body[^>]*>/gi, '');
+  return s.trim();
+}
+
+function buildGmailQuoteHtml({ headers, quotedHtml, bodyText }) {
+  const esc = (s) => String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  let from = '';
+  let date = '';
+  let subj = '';
+  if (Array.isArray(headers)) {
+    from = pickHeader(headers, 'From');
+    date = pickHeader(headers, 'Date');
+    subj = pickHeader(headers, 'Subject');
+  } else {
+    const h = headers || {};
+    from = h.from || '';
+    date = h.date || '';
+    subj = h.subject || '';
+  }
+
+  const attrBits = [];
+  if (date) attrBits.push(date);
+  if (from) attrBits.push(from);
+  const attrLine = attrBits.length ? `On ${esc(attrBits.join(', '))} wrote:` : 'On a previous message wrote:';
+
+  let inner = '';
+  if (quotedHtml) {
+    inner = `<div dir="ltr">${sanitizeQuotedHtml(quotedHtml)}</div>`;
+  } else {
+    const quoted = esc(String(bodyText || '')).replace(/\r?\n/g, '<br>');
+    inner = `<div dir="ltr">${quoted}</div>`;
+  }
+
+  return [
+    '<div class="gmail_quote">',
+    `<div dir="ltr" class="gmail_attr">${attrLine}</div>`,
+    '<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px solid #ccc;padding-left:1ex;">',
+    subj ? `<div><b>Subject:</b> ${esc(subj)}</div><br>` : '',
+    inner,
+    '</blockquote>',
+    '</div>',
+  ].join('');
+}
+
 function plainToHtml(text) {
   const esc = (s) => String(s)
     .replace(/&/g, '&amp;')
@@ -242,8 +317,23 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, re
   const withClosing = cleaned.toLowerCase().includes('kind regards,') ? cleaned : (cleaned + '\n\nKind regards,');
 
   const signatureHtml = await getWorkSignatureHtml();
+
+  // Append Gmail-like quote below signature.
+  let quoteHtml = '';
+  try {
+    const full = await getMessageFull(replyToMessageId);
+    const payload = full.message && full.message.payload ? full.message.payload : null;
+    const headers = payload && Array.isArray(payload.headers) ? payload.headers : [];
+    const quotedHtml = extractTextHtml(payload);
+    const bodyText = extractTextPlain(payload) || (full.message && full.message.snippet ? full.message.snippet : '') || '';
+    quoteHtml = buildGmailQuoteHtml({ headers, quotedHtml: quotedHtml || '', bodyText });
+  } catch (e) {
+    // proceed without quote
+  }
+
   const bodyHtml = plainToHtml(withClosing);
   let fullHtml = bodyHtml + '\n' + signatureHtml;
+  if (quoteHtml && String(quoteHtml).trim()) fullHtml += '\n' + quoteHtml;
 
   const args = [
     '--client', CLIENT,
