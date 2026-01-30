@@ -106,8 +106,8 @@ function sanitizeQuotedHtml(html) {
   s = s.replace(/<link[^>]*>/gi, '');
   s = s.replace(/<title[^>]*>[\s\S]*?<\/title>/gi, '');
 
-  // Inline images (cid:) sometimes don't render in quotes - drop them to keep the quote visible.
-  s = s.replace(/<img[^>]*>/gi, '');
+  // Keep <img> tags - Gmail may still choose to hide them in quoted blocks,
+  // but removing them guarantees images disappear.
 
   s = s.replace(/<\/?html[^>]*>/gi, '');
   s = s.replace(/<\/?body[^>]*>/gi, '');
