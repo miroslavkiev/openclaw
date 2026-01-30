@@ -12,3 +12,6 @@
     - Include quoted previous message content at the bottom (Gmail-like quote block) when replying.
     - Note: quoted blocks may behave differently in Gmail. Prefer keeping <img> tags in quoted HTML; Gmail may still hide them depending on how the original message referenced attachments/inline content.
 - If an LLM result appears empty, prefer investigating parsing/schema issues and logging over generating a fallback email body.
+- Gmail drafter reliability:
+  - Retry draft creation a few times with backoff on failures.
+  - On failure, apply a `draft_failed` label and append a JSONL error record to `logs/gmail-drafter-errors.jsonl`.
