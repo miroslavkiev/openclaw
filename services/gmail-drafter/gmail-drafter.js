@@ -503,23 +503,39 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, si
     '--timeout', '180',
   ], 300000);
 
-  const res = JSON.parse(out || '{}');
-  const text = (res.payloads && res.payloads[0] && res.payloads[0].text) ? res.payloads[0].text : '';
-  let cleaned = String(text || '').trim();
+  let res;
+  try {
+    res = JSON.parse(out || '{}');
+  } catch (e) {
+    logLine({ event: 'error', where: 'draftWithLlm.parse_json', messageId: replyToMessageId, error: String(e && e.message ? e.message : e), outPreview: String(out || '').slice(0, 500) });
+    throw e;
+  }
 
-  // Safety net: occasionally the agent returns an empty payload (timeouts, routing issues,
-  // or overly-strict output constraints). In that case, still create a draft with a
-  // minimal, polite clarification request instead of failing the whole pipeline.
+  // clawd CLI JSON schema can vary by version. Try a few known shapes.
+  const candidates = [
+    res && res.text,
+    res && res.reply,
+    res && res.payload && res.payload.text,
+    res && Array.isArray(res.payloads) && res.payloads[0] && res.payloads[0].text,
+    res && Array.isArray(res.messages) && res.messages[0] && res.messages[0].text,
+    res && res.result && res.result.text,
+    res && res.output && res.output.text,
+  ];
+  const text = candidates.find((x) => typeof x === 'string' && x.trim()) || '';
+  const cleaned = String(text || '').trim();
+
   if (!cleaned) {
-    const first = extractFirstName(displayName);
-    cleaned = [
-      first ? `Hi ${first},` : 'Hi,',
-      '',
-      'I saw the calendar update. Could you please confirm the new proposed time for the prep call?',
-      '',
-      'Kind regards,',
-    ].join('\n');
-    logLine({ event: 'warn', where: 'draftWithLlm', messageId: replyToMessageId, error: 'LLM returned empty draft - used fallback' });
+    logLine({
+      event: 'error',
+      where: 'draftWithLlm',
+      messageId: replyToMessageId,
+      error: 'LLM returned empty draft',
+      resKeys: res && typeof res === 'object' ? Object.keys(res) : [],
+      outPreview: String(out || '').slice(0, 800),
+      contextLen: String(contextText || '').length,
+      contextPreview: String(contextText || '').slice(0, 500),
+    });
+    throw new Error('LLM returned empty draft');
   }
 
   const bodyHtml = plainToHtml(cleaned);
