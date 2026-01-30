@@ -34,6 +34,12 @@ Source: user message (2026-01-29). This is the desired end-state behavior for th
 6) Create HTML draft:
    - `gog gmail drafts create --body-html ... --from myroslav.kravchenko@ciklum.com --reply-to-message-id <id>`
 
+## Classification labels (visibility)
+- After eligibility checks, add a Gmail label to the thread so it is visible that the email was processed:
+  - `personal` - non-broadcast emails (auto-draft eligible)
+  - `mass` - broadcast or mass mail (draft skipped)
+- Labels are created on demand if missing.
+
 ## Notes
 - The agent should return text in JSON only; no WhatsApp alerts.
 - The drafted email body should not include the signature; signature is appended only at API stage.

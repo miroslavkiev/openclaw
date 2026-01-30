@@ -22,6 +22,10 @@ const GOG_CLIENT = process.env.GOG_CLIENT || 'work';
 const CLAWDBOT_BIN = process.env.CLAWDBOT_BIN || '/opt/homebrew/bin/clawdbot';
 const FROM_ALIAS = process.env.FROM_ALIAS || 'myroslav.kravchenko@ciklum.com';
 
+// Gmail labels used to mark classification outcome (created on demand)
+const LABEL_PERSONAL = process.env.LABEL_PERSONAL || 'personal';
+const LABEL_MASS = process.env.LABEL_MASS || 'mass';
+
 function json(res, code, obj) {
   const body = Buffer.from(JSON.stringify(obj));
   res.writeHead(code, {
@@ -195,8 +199,7 @@ function extractTextHtml(payload) {
   return '';
 }
 
-async function getThreadContextText(messageId, maxMessages = 6) {
-  // Find thread id
+async function getThreadIdForMessage(messageId) {
   const meta = await execFile(GOG_BIN, [
     '--client', GOG_CLIENT,
     '--account', WORK_ACCOUNT,
@@ -205,7 +208,48 @@ async function getThreadContextText(messageId, maxMessages = 6) {
     '--plain',
   ]);
   const threadIdLine = meta.out.split('\n').find((l) => l.startsWith('thread_id\t'));
-  const threadId = threadIdLine ? threadIdLine.split('\t')[1].trim() : '';
+  return threadIdLine ? threadIdLine.split('\t')[1].trim() : '';
+}
+
+async function ensureLabelExists(labelName) {
+  const name = String(labelName || '').trim();
+  if (!name) return;
+
+  const listed = await execFile(GOG_BIN, [
+    '--client', GOG_CLIENT,
+    '--account', WORK_ACCOUNT,
+    'gmail', 'labels', 'list',
+    '--json',
+  ]);
+
+  const obj = JSON.parse(listed.out || '{}');
+  const labels = Array.isArray(obj.labels) ? obj.labels : [];
+  const exists = labels.some((l) => String(l.name || '').toLowerCase() === name.toLowerCase());
+  if (exists) return;
+
+  await execFile(GOG_BIN, [
+    '--client', GOG_CLIENT,
+    '--account', WORK_ACCOUNT,
+    'gmail', 'labels', 'create', name,
+  ]);
+}
+
+async function addLabelByMessageId(messageId, labelName) {
+  const threadId = await getThreadIdForMessage(messageId);
+  if (!threadId) return;
+
+  await ensureLabelExists(labelName);
+  await execFile(GOG_BIN, [
+    '--client', GOG_CLIENT,
+    '--account', WORK_ACCOUNT,
+    'gmail', 'labels', 'modify', threadId,
+    '--add', String(labelName || '').trim(),
+  ]);
+}
+
+async function getThreadContextText(messageId, maxMessages = 6) {
+  // Find thread id
+  const threadId = await getThreadIdForMessage(messageId);
   if (!threadId) return '';
 
   const t = await execFile(GOG_BIN, [
@@ -484,8 +528,22 @@ async function processQueue() {
         continue;
       }
       if (looksLikeBroadcast(msg)) {
+        try {
+          await addLabelByMessageId(msg.id, LABEL_MASS);
+          logLine({ event: 'labeled', messageId: msg.id, label: LABEL_MASS, kind: 'mass' });
+        } catch (e) {
+          logLine({ event: 'error', where: 'label_mass', messageId: msg.id, error: String(e && e.message ? e.message : e) });
+        }
         logLine({ event: 'skipped', skipped: [{ fromEmail, subj, reason: 'looks_like_broadcast', to: msg.to, cc: msg.cc }] });
         continue;
+      }
+
+      // Mark as personal (non-broadcast) so it's visible that it was processed.
+      try {
+        await addLabelByMessageId(msg.id, LABEL_PERSONAL);
+        logLine({ event: 'labeled', messageId: msg.id, label: LABEL_PERSONAL, kind: 'personal' });
+      } catch (e) {
+        logLine({ event: 'error', where: 'label_personal', messageId: msg.id, error: String(e && e.message ? e.message : e) });
       }
 
       try {
