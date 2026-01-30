@@ -10,6 +10,14 @@ Local push receivers (Pub/Sub push handlers):
 - Personal receiver: 127.0.0.1:8788 (hostname: gmail-personal.kravchen.com)
 - Work receiver:     127.0.0.1:8789 (hostname: gmail-work.kravchen.com)
 
+Public endpoints:
+- These hostnames are exposed via Cloudflare Tunnel (external -> internal reverse proxy).
+- The push receiver URL paths are configured as `/` (see LaunchAgent `--path /`).
+- Typical public endpoints (external):
+  - https://gmail-personal.kravchen.com/ (Cloudflare Tunnel -> 127.0.0.1:8788)
+  - https://gmail-work.kravchen.com/ (Cloudflare Tunnel -> 127.0.0.1:8789)
+- Note: Cloudflare tunnel + reverse proxy mapping is managed outside this repo; this doc assumes the tunnel routes those hostnames to the local listeners above.
+
 LaunchAgents (macOS):
 - ~/Library/LaunchAgents/com.mk.gog.gmail-personal-serve.plist
   - Runs: `gog --client personal --account kravch@gmail.com gmail watch serve --bind 127.0.0.1 --port 8788 --path / --token <token> --hook-url http://127.0.0.1:18789/hooks/gmail-personal --hook-token <hook-token> --include-body --max-bytes 20000`
@@ -60,4 +68,5 @@ Common failures + fixes:
 - calendar API disabled errors are unrelated to Gmail watch.
 
 Notes:
+- Host networking: this machine is behind double NAT. External access is provided via Cloudflare Tunnel.
 - In this environment, `launchctl bootstrap` sometimes fails with I/O error; `launchctl load -w <plist>` works.

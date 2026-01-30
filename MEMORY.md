@@ -24,4 +24,4 @@
   - com.mk.gog.gmail-personal-serve (+ renew)
   - com.mk.gog.gmail-work-serve (+ renew)
   - com.mk.gmail-drafter (work drafts) on 127.0.0.1:18990/gmail-work
-- Full operational details: memory/gog-dual-gmail-watch-setup.md
+- Full operational details: memory/gog-dual-gmail-watch-setup.md (includes Cloudflare Tunnel hostnames/endpoints + double NAT note)
