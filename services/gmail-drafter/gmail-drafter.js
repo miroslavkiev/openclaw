@@ -545,10 +545,10 @@ function ensureKindRegards(text) {
   const s = String(text || '').trim();
   if (!s) return s;
   // Always include "Kind regards," before the HTML signature (signature is appended separately).
-  // Do NOT add an extra blank line - we want exactly one line break before the signature.
+  // We want one blank line before "Kind regards," and exactly one line break before the signature.
   const tail = s.slice(-200).toLowerCase();
   if (tail.includes('kind regards,')) return s;
-  return s + '\nKind regards,';
+  return s + '\n\nKind regards,';
 }
 
 async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, signatureHtml, recipientName }) {

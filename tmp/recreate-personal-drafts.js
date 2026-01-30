@@ -237,8 +237,9 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, re
   const cleaned = String(text || '').trim();
   if (!cleaned) throw new Error('Empty LLM output');
 
-  // Ensure closing line before signature (no extra blank line)
-  const withClosing = cleaned.toLowerCase().includes('kind regards,') ? cleaned : (cleaned + '\nKind regards,');
+  // Ensure closing line before signature: one blank line before Kind regards,
+  // and no extra blank line between Kind regards, and signature.
+  const withClosing = cleaned.toLowerCase().includes('kind regards,') ? cleaned : (cleaned + '\n\nKind regards,');
 
   const signatureHtml = await getWorkSignatureHtml();
   const bodyHtml = plainToHtml(withClosing);
