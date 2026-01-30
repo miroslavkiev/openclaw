@@ -38,6 +38,9 @@
   - Start with "Hi" (not "Hello").
   - End message text with "Kind regards,".
 
+## Working preference (internal)
+- When I create or modify any automation, script, LaunchAgent, cron job, or service, I should proactively update memory (daily log and, if long-lived, MEMORY.md) without waiting for a reminder.
+
 ## Email drafting - gog (important)
 - Accounts available in gog auth:
   - Work: krmy@ciklum.com
