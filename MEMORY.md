@@ -26,6 +26,10 @@
   - com.mk.gmail-drafter (work drafts) on 127.0.0.1:18990/gmail-work
 - Full operational details: memory/gog-dual-gmail-watch-setup.md (includes Cloudflare Tunnel hostnames/endpoints + double NAT note)
 
+## Shopping list file (persistent)
+- Canonical shopping list file in workspace: `/Users/mk/clawd/shopping-list.md`.
+- Default behavior: when Myroslav asks to add/remove/show items for “shopping list / список покупок” without specifying another note/list, update this file.
+
 ## Google Chat (OpenClaw) setup via Cloudflare Tunnel
 - Plugin: bundled `@openclaw/googlechat` (enable via `openclaw plugins enable googlechat`).
 - Cloudflare Tunnel service runs as root LaunchDaemon `system/com.cloudflare.cloudflared` and reads config from `/etc/cloudflared/config.yml` (not `/opt/homebrew/etc/cloudflared/config.yml`).
