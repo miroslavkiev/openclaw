@@ -49,6 +49,8 @@
       <string>gateway</string>
       <key>OPENCLAW_SERVICE_VERSION</key>
       <string>2026.1.29</string>
+
+      <!-- Gmail watcher runs inside OpenClaw gateway (so do NOT disable it) -->
     </dict>
   </dict>
 </plist>

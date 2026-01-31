@@ -11,8 +11,10 @@ plists=(
   ai.openclaw.gateway.plist
   ai.openclaw.shopping-list-weekly-staples.plist
   com.mk.gmail-drafter.plist
-  com.mk.gog.gmail-personal-serve.plist
-  com.mk.gog.gmail-personal-renew.plist
+  # NOTE: personal gmail watcher is run inside OpenClaw gateway via hooks.gmail.
+  # Do NOT load the external personal watcher to avoid port conflicts on 8788.
+  # com.mk.gog.gmail-personal-serve.plist
+  # com.mk.gog.gmail-personal-renew.plist
   com.mk.gog.gmail-work-serve.plist
   com.mk.gog.gmail-work-renew.plist
   com.mk.n8n.plist

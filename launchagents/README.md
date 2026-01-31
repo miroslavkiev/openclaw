@@ -14,6 +14,10 @@ Format: bash-compatible `KEY=VALUE` lines.
 Template:
 - `launchagents/secrets.env.example`
 
+## Gmail watchers note
+- Personal Gmail watch (8788 -> OpenClaw) is run by **OpenClaw gateway** via `hooks.gmail`.
+- Work Gmail watch is run as separate LaunchAgents (`com.mk.gog.gmail-work-serve` + renew) and posts to `gmail-drafter`.
+
 Recommended:
 - `chmod 600 ~/.openclaw/secrets/secrets.env`
 
