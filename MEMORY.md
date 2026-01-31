@@ -63,6 +63,19 @@
   - OFF: `switch.turn_off`
 - Note: this was confirmed to work; the older `automation.turn_bath_mirror_*` may not actually affect the physical switch.
 
+## Telegram (OpenClaw) setup
+- Telegram bot enabled via `channels.telegram`.
+- Bot: `@mkravch_bot`.
+- DM policy: `allowlist` with allowed user_id: `402628226`.
+- Group policy: `allowlist` with explicit group chat IDs:
+  - `-1003898983945` ("Батьки і ШІ")
+  - `-5047651066` ("Люся та ШІ")
+- Group behavior: `requireMention=false` (respond to all group messages).
+- Note: If Telegram BotFather privacy mode is ON, unmentioned messages can be blocked. Set `/setprivacy` → Disable and re-add bot to group.
+- Secrets handling note:
+  - Bot token is stored in `~/.openclaw/openclaw.json` under `channels.telegram.botToken` (local machine; not in repo).
+  - `~/.openclaw/secrets/secrets.env` currently contains `TELEGRAM_BOT_TOKEN`, but source of truth should be iCloud Keychain (`openclaw/TELEGRAM_BOT_TOKEN`) and regenerated via `scripts/secrets_env_from_keychain.sh`.
+
 ## Gmail watcher layout
 - Personal Gmail watch should be run by **OpenClaw gateway** (built-in gmail watcher) when `hooks.gmail` is configured.
 - Do NOT run a separate LaunchAgent on 8788 for personal watcher; it causes port conflicts.
