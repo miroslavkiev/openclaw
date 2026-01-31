@@ -40,6 +40,16 @@
   - Installed via symlink to: `~/Library/LaunchAgents/ai.openclaw.shopping-list-weekly-staples.plist`
   - Logs: `/tmp/openclaw-shopping-list-weekly-staples.out.log` and `.err.log`
 
+## Default operational approach: scripts + LaunchAgents + secrets
+- Default for future automations on this machine:
+  - Put scripts in the repo under `/Users/mk/clawd/scripts/`.
+  - Put LaunchAgent plists in the repo under `/Users/mk/clawd/launchagents/`.
+  - Install via symlink into `~/Library/LaunchAgents/` (never edit files directly there).
+  - Keep secrets OUT of git:
+    - Store secrets in `~/.openclaw/secrets/secrets.env` (chmod 600)
+    - Prefer storing source-of-truth credentials in iCloud Keychain and (re)generating `secrets.env` as needed.
+  - Use `launchagents/install.sh` to (re)install/restore.
+
 ## Google Chat (OpenClaw) setup via Cloudflare Tunnel
 - Plugin: bundled `@openclaw/googlechat` (enable via `openclaw plugins enable googlechat`).
 - Cloudflare Tunnel service runs as root LaunchDaemon `system/com.cloudflare.cloudflared` and reads config from `/etc/cloudflared/config.yml` (not `/opt/homebrew/etc/cloudflared/config.yml`).
