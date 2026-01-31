@@ -1,0 +1,4 @@
+
+# Local secrets (never commit)
+/launchagents/secrets.env
+/.openclaw/secrets/

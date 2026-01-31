@@ -1,18 +1,32 @@
-# LaunchAgents
+# LaunchAgents (source of truth)
 
-This folder contains **source-of-truth** macOS LaunchAgent plist files for this machine.
+We keep LaunchAgent plist files **in the repo** and install them via symlink into `~/Library/LaunchAgents/`.
 
-## Install / Restore
+## Secrets
 
-Symlink the desired plist(s) into `~/Library/LaunchAgents/` and load them:
+Secrets are **NOT** committed.
+
+Place them here:
+- `~/.openclaw/secrets/secrets.env`
+
+Format: bash-compatible `KEY=VALUE` lines.
+
+Template:
+- `launchagents/secrets.env.example`
+
+Recommended:
+- `chmod 600 ~/.openclaw/secrets/secrets.env`
+
+## Install / restore
 
 ```bash
-ln -sf /Users/mk/clawd/launchagents/<file>.plist ~/Library/LaunchAgents/<file>.plist
-launchctl unload -w ~/Library/LaunchAgents/<file>.plist >/dev/null 2>&1 || true
-launchctl load -w ~/Library/LaunchAgents/<file>.plist
-launchctl list | grep <label>
+mkdir -p ~/.openclaw/secrets
+cp /Users/mk/clawd/launchagents/secrets.env.example ~/.openclaw/secrets/secrets.env
+chmod 600 ~/.openclaw/secrets/secrets.env
+
+bash /Users/mk/clawd/launchagents/install.sh
 ```
 
 ## Notes
-- Keep scripts in the repo (e.g. `scripts/`), and keep LaunchAgent plists in this folder.
-- Avoid editing plists directly in `~/Library/LaunchAgents/` - always edit the repo version.
+- Prefer storing secrets in iCloud Keychain, then (re)populate `~/.openclaw/secrets/secrets.env` from there.
+- Do NOT edit plists directly in `~/Library/LaunchAgents/` - always edit the repo versions.

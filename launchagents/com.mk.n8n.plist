@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key><string>com.mk.n8n</string>
+
+    <key>ProgramArguments</key>
+    <array>
+      <string>/bin/bash</string>
+      <string>-lc</string>
+      <string>set -euo pipefail; source /Users/mk/.openclaw/secrets/secrets.env; exec /Users/mk/.nvm/versions/node/v20.20.0/bin/n8n</string>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>PATH</key>
+      <string>/Users/mk/.nvm/versions/node/v20.20.0/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+
+      <key>N8N_HOST</key><string>0.0.0.0</string>
+      <key>NODES_EXCLUDE</key><string>[]</string>
+      <key>N8N_PORT</key><string>5678</string>
+      <key>N8N_PROTOCOL</key><string>http</string>
+      <key>N8N_EDITOR_BASE_URL</key><string>http://localhost:5678</string>
+      <key>WEBHOOK_URL</key><string>http://localhost:5678</string>
+    </dict>
+
+    <key>RunAtLoad</key><true/>
+    <key>KeepAlive</key><true/>
+
+    <key>StandardOutPath</key><string>/tmp/n8n.out.log</string>
+    <key>StandardErrorPath</key><string>/tmp/n8n.err.log</string>
+  </dict>
+</plist>
