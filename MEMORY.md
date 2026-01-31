@@ -57,9 +57,11 @@
   - account: `mk`
 
 ## Home Assistant voice intent mapping (bathroom mirror)
-- When Myroslav says “увімкни/вимкни світло в ванні/ванній” (bathroom), use these HA automations:
-  - ON: `automation.turn_bath_mirror_on`
-  - OFF: `automation.turn_bath_mirror_off`
+- When Myroslav says “увімкни/вимкни світло в ванні/ванній” (bathroom), control this HA entity:
+  - `switch.bath_mirror_switch_switch_1`
+  - ON: `switch.turn_on`
+  - OFF: `switch.turn_off`
+- Note: this was confirmed to work; the older `automation.turn_bath_mirror_*` may not actually affect the physical switch.
 
 ## Gmail watcher layout
 - Personal Gmail watch should be run by **OpenClaw gateway** (built-in gmail watcher) when `hooks.gmail` is configured.
