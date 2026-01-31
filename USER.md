@@ -7,6 +7,7 @@
 - **Pronouns:** he/him
 - **Timezone:** Europe/Berlin
 - **Notes:**
+  - Location: near Nürnberg (Nuremberg), Bavaria, Germany.
   - Wife: Люсі (Lucy) — email: Luisiya@gmail.com
   - Prefers replies in Ukrainian.
   - Prefers hyphen (-) instead of long dash.
