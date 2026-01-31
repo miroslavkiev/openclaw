@@ -46,12 +46,14 @@
   - Put LaunchAgent plists in the repo under `/Users/mk/clawd/launchagents/`.
   - Install via symlink into `~/Library/LaunchAgents/` (never edit files directly there).
   - Keep secrets OUT of git:
-    - Store secrets in `~/.openclaw/secrets/secrets.env` (chmod 600)
-    - Prefer storing source-of-truth credentials in iCloud Keychain and (re)generating `secrets.env` as needed.
+    - Source of truth: iCloud Keychain.
+    - Runtime: generate `~/.openclaw/secrets/secrets.env` (chmod 600) from Keychain.
+    - Use env placeholders (`${ENV_VAR}`) inside repo-friendly configs.
   - Use `launchagents/install.sh` to (re)install/restore.
 
 ## Keychain-backed secrets.env
-- `scripts/secrets_env_from_keychain.sh` can generate `~/.openclaw/secrets/secrets.env` from iCloud Keychain.
+- `scripts/secrets_env_from_keychain.sh` generates `~/.openclaw/secrets/secrets.env` from iCloud Keychain.
+- `scripts/secrets_keychain_from_env.sh` stores secrets from `secrets.env` into Keychain.
 - Convention: Generic Password entries with:
   - service: `openclaw/<ENV_KEY>`
   - account: `mk`
@@ -73,8 +75,15 @@
 - Group behavior: `requireMention=false` (respond to all group messages).
 - Note: If Telegram BotFather privacy mode is ON, unmentioned messages can be blocked. Set `/setprivacy` → Disable and re-add bot to group.
 - Secrets handling note:
-  - Bot token is stored in `~/.openclaw/openclaw.json` under `channels.telegram.botToken` (local machine; not in repo).
-  - `~/.openclaw/secrets/secrets.env` currently contains `TELEGRAM_BOT_TOKEN`, but source of truth should be iCloud Keychain (`openclaw/TELEGRAM_BOT_TOKEN`) and regenerated via `scripts/secrets_env_from_keychain.sh`.
+  - Source of truth: iCloud Keychain (`openclaw/TELEGRAM_BOT_TOKEN`, account `mk`).
+  - Runtime env file: `~/.openclaw/secrets/secrets.env` (generated from Keychain).
+  - OpenClaw config should reference it as `${TELEGRAM_BOT_TOKEN}` in `~/.openclaw/openclaw.json`.
+
+## Restart safety (important)
+- Before triggering any restart (gateway restart / config apply / updates):
+  - Write what is still unfinished to `memory/pending-after-restart.md`.
+- After restart:
+  - Check `memory/pending-after-restart.md`, finish the remaining items, then clear/update the file and report.
 
 ## Gmail watcher layout
 - Personal Gmail watch should be run by **OpenClaw gateway** (built-in gmail watcher) when `hooks.gmail` is configured.

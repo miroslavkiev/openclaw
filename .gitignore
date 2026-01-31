@@ -2,3 +2,9 @@
 # Local secrets (never commit)
 /launchagents/secrets.env
 /.openclaw/secrets/
+
+# Local logs / scratch
+/logs/
+/tmp/
+/tmp_whisper/
+/canvas/

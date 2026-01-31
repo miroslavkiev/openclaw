@@ -1,0 +1,204 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.1.29",
+    "lastTouchedAt": "2026-01-31T18:01:19.807Z"
+  },
+  "env": {
+    "vars": {
+      "BRAVE_API_KEY": "BSAMhHh66PhdsRPr6EmfSbfoDllrdKL"
+    }
+  },
+  "wizard": {
+    "lastRunAt": "2026-01-30T18:28:22.520Z",
+    "lastRunVersion": "2026.1.29",
+    "lastRunCommand": "onboard",
+    "lastRunMode": "local"
+  },
+  "update": {
+    "channel": "stable",
+    "checkOnStart": true
+  },
+  "auth": {
+    "profiles": {
+      "openai-codex:default": {
+        "provider": "openai-codex",
+        "mode": "oauth"
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "openai-codex/gpt-5.2"
+      },
+      "models": {
+        "openai-codex/gpt-5.2": {}
+      },
+      "workspace": "/Users/mk/clawd",
+      "compaction": {
+        "mode": "safeguard"
+      },
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 8
+      }
+    }
+  },
+  "tools": {
+    "web": {
+      "search": {
+        "enabled": true,
+        "provider": "brave",
+        "apiKey": "BSAMhHh66PhdsRPr6EmfSbfoDllrdKL",
+        "maxResults": 5
+      },
+      "fetch": {
+        "enabled": true,
+        "maxChars": 8000
+      }
+    }
+  },
+  "messages": {
+    "ackReactionScope": "group-mentions"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto"
+  },
+  "hooks": {
+    "enabled": true,
+    "path": "/hooks",
+    "token": "${OPENCLAW_HOOK_TOKEN}",
+    "presets": [
+      "gmail"
+    ],
+    "mappings": [
+      {
+        "id": "gmail-personal",
+        "deliver": false
+      },
+      {
+        "id": "gmail-work",
+        "deliver": false
+      }
+    ],
+    "gmail": {
+      "account": "kravch@gmail.com",
+      "label": "INBOX",
+      "topic": "projects/charged-skein-485620-j2/topics/gog-gmail-watch",
+      "subscription": "gog-gmail-watch-push",
+      "pushToken": "${GMAIL_PERSONAL_PUSH_TOKEN}",
+      "hookUrl": "http://127.0.0.1:18789/hooks/gmail-personal",
+      "includeBody": true,
+      "maxBytes": 20000,
+      "renewEveryMinutes": 720,
+      "serve": {
+        "bind": "127.0.0.1",
+        "port": 8788,
+        "path": "/"
+      },
+      "tailscale": {
+        "mode": "off",
+        "path": "/"
+      }
+    },
+    "internal": {
+      "enabled": true,
+      "entries": {
+        "boot-md": {
+          "enabled": true
+        },
+        "command-logger": {
+          "enabled": true
+        },
+        "session-memory": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "channels": {
+    "whatsapp": {
+      "dmPolicy": "allowlist",
+      "selfChatMode": true,
+      "allowFrom": [
+        "+4915123355830"
+      ],
+      "groupPolicy": "allowlist",
+      "mediaMaxMb": 50,
+      "debounceMs": 0
+    },
+    "telegram": {
+      "dmPolicy": "allowlist",
+      "botToken": "${TELEGRAM_BOT_TOKEN}",
+      "groups": {
+        "-1003898983945": {
+          "requireMention": false
+        },
+        "-5047651066": {
+          "requireMention": false
+        }
+      },
+      "allowFrom": [
+        402628226
+      ],
+      "groupPolicy": "allowlist",
+      "streamMode": "partial"
+    },
+    "googlechat": {
+      "enabled": true,
+      "groupPolicy": "allowlist",
+      "serviceAccountFile": "/Users/mk/.openclaw/credentials/service_account_googlechat.json",
+      "audienceType": "app-url",
+      "audience": "https://googlechat.kravchen.com/googlechat",
+      "webhookPath": "/googlechat",
+      "dm": {
+        "policy": "allowlist",
+        "allowFrom": [
+          "krmy@ciklum.com",
+          "kravch@gmail.com"
+        ]
+      }
+    }
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "loopback",
+    "auth": {
+      "mode": "password",
+      "password": "WINning12#"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    }
+  },
+  "skills": {
+    "install": {
+      "nodeManager": "npm"
+    },
+    "entries": {
+      "homeassistant": {
+        "env": {
+          "HA_URL": "http://127.0.0.1:8123",
+          "HA_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0YmRkNTVhMDI4NmU0ZWExOGVmZjQ3MzQwNTc3NjNhMiIsImlhdCI6MTc2OTg2NjU3NiwiZXhwIjoyMDg1MjI2NTc2fQ.9Z7hYpEU-N5GYlmp4NEprvFuIQfAWO0kbLfcH_ymVqE"
+        }
+      }
+    }
+  },
+  "plugins": {
+    "entries": {
+      "whatsapp": {
+        "enabled": true
+      },
+      "googlechat": {
+        "enabled": true
+      },
+      "telegram": {
+        "enabled": true
+      }
+    }
+  },
+  "_note": "Example OpenClaw config. Secrets are referenced via env vars in ~/.openclaw/secrets/secrets.env (generated from Keychain)."
+}
