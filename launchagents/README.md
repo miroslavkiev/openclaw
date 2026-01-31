@@ -20,13 +20,42 @@ Recommended:
 ## Install / restore
 
 ```bash
+# 1) Put secrets into Keychain (recommended) or create secrets.env manually.
 mkdir -p ~/.openclaw/secrets
+
+# Optional: start from the template
 cp /Users/mk/clawd/launchagents/secrets.env.example ~/.openclaw/secrets/secrets.env
 chmod 600 ~/.openclaw/secrets/secrets.env
 
+# 2) Install/restore LaunchAgents
 bash /Users/mk/clawd/launchagents/install.sh
 ```
 
+## Keychain-backed secrets (recommended)
+
+We can regenerate `~/.openclaw/secrets/secrets.env` from macOS/iCloud Keychain.
+
+Convention:
+- Keychain item type: **Generic Password**
+- service: `openclaw/<ENV_KEY>`
+- account: `mk`
+
+Examples (run once per secret):
+
+```bash
+security add-generic-password -U -s 'openclaw/OPENCLAW_HOOK_TOKEN' -a 'mk' -w '...'
+security add-generic-password -U -s 'openclaw/GMAIL_PERSONAL_PUSH_TOKEN' -a 'mk' -w '...'
+security add-generic-password -U -s 'openclaw/GMAIL_WORK_PUSH_TOKEN' -a 'mk' -w '...'
+security add-generic-password -U -s 'openclaw/N8N_ENCRYPTION_KEY' -a 'mk' -w '...'
+
+# regenerate ~/.openclaw/secrets/secrets.env
+bash /Users/mk/clawd/scripts/secrets_env_from_keychain.sh
+
+# If you really want to overwrite an existing secrets.env even when some Keychain
+# items are missing:
+# bash /Users/mk/clawd/scripts/secrets_env_from_keychain.sh --force
+```
+
 ## Notes
-- Prefer storing secrets in iCloud Keychain, then (re)populate `~/.openclaw/secrets/secrets.env` from there.
 - Do NOT edit plists directly in `~/Library/LaunchAgents/` - always edit the repo versions.
+- Keep `~/.openclaw/secrets/secrets.env` out of git (chmod 600).
