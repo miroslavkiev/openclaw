@@ -15,6 +15,9 @@
 
     <key>ProgramArguments</key>
     <array>
+      <string>/Users/mk/clawd/scripts/run_with_env.sh</string>
+      <string>/Users/mk/.openclaw/secrets/secrets.env</string>
+      <string>--</string>
       <string>/opt/homebrew/bin/node</string>
       <string>/opt/homebrew/lib/node_modules/openclaw/dist/index.js</string>
       <string>gateway</string>
