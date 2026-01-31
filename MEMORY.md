@@ -56,6 +56,11 @@
   - service: `openclaw/<ENV_KEY>`
   - account: `mk`
 
+## Home Assistant voice intent mapping (bathroom mirror)
+- When Myroslav says “увімкни/вимкни світло в ванні/ванній” (bathroom), use these HA automations:
+  - ON: `automation.turn_bath_mirror_on`
+  - OFF: `automation.turn_bath_mirror_off`
+
 ## Gmail watcher layout
 - Personal Gmail watch should be run by **OpenClaw gateway** (built-in gmail watcher) when `hooks.gmail` is configured.
 - Do NOT run a separate LaunchAgent on 8788 for personal watcher; it causes port conflicts.
