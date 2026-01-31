@@ -50,6 +50,17 @@
     - Prefer storing source-of-truth credentials in iCloud Keychain and (re)generating `secrets.env` as needed.
   - Use `launchagents/install.sh` to (re)install/restore.
 
+## Keychain-backed secrets.env
+- `scripts/secrets_env_from_keychain.sh` can generate `~/.openclaw/secrets/secrets.env` from iCloud Keychain.
+- Convention: Generic Password entries with:
+  - service: `openclaw/<ENV_KEY>`
+  - account: `mk`
+
+## Gmail watcher layout
+- Personal Gmail watch should be run by **OpenClaw gateway** (built-in gmail watcher) when `hooks.gmail` is configured.
+- Do NOT run a separate LaunchAgent on 8788 for personal watcher; it causes port conflicts.
+- Work Gmail watch is run as separate LaunchAgents and posts to `gmail-drafter` on 18990.
+
 ## Google Chat (OpenClaw) setup via Cloudflare Tunnel
 - Plugin: bundled `@openclaw/googlechat` (enable via `openclaw plugins enable googlechat`).
 - Cloudflare Tunnel service runs as root LaunchDaemon `system/com.cloudflare.cloudflared` and reads config from `/etc/cloudflared/config.yml` (not `/opt/homebrew/etc/cloudflared/config.yml`).
