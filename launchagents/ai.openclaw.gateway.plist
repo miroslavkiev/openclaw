@@ -39,7 +39,7 @@
       <key>HOME</key>
       <string>/Users/mk</string>
       <key>PATH</key>
-      <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+      <string>/Users/mk/clawd/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
       <key>OPENCLAW_GATEWAY_PORT</key>
       <string>18789</string>
       <key>OPENCLAW_LAUNCHD_LABEL</key>

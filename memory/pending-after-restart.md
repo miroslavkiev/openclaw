@@ -1,3 +1,2 @@
-# Pending after restart
-
-(Empty)
+- DONE: Enabled tools.media.audio (CLI) + JSONL timing markers in scripts/mlx_whisper_transcribe.sh.
+- DONE: Verified with Telegram voice; /tmp/openclaw/audio-transcribe.jsonl shows durationMs.
