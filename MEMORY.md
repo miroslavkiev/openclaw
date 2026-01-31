@@ -30,6 +30,16 @@
 - Canonical shopping list file in workspace: `/Users/mk/clawd/shopping-list.md`.
 - Default behavior: when Myroslav asks to add/remove/show items for “shopping list / список покупок” without specifying another note/list, update this file.
 
+## Shopping list auto-readd (weekly staples)
+- Requirement: every Saturday at 10:00 (Europe/Berlin), ensure these items exist in `shopping-list.md` even if removed during the week:
+  - червона риба солона
+  - авокадо
+- Implementation: macOS LaunchAgent (launchd), not Home Assistant.
+  - Script: `/Users/mk/clawd/scripts/shopping_list_weekly_staples.py`
+  - LaunchAgent plist (source of truth in repo): `/Users/mk/clawd/launchagents/ai.openclaw.shopping-list-weekly-staples.plist`
+  - Installed via symlink to: `~/Library/LaunchAgents/ai.openclaw.shopping-list-weekly-staples.plist`
+  - Logs: `/tmp/openclaw-shopping-list-weekly-staples.out.log` and `.err.log`
+
 ## Google Chat (OpenClaw) setup via Cloudflare Tunnel
 - Plugin: bundled `@openclaw/googlechat` (enable via `openclaw plugins enable googlechat`).
 - Cloudflare Tunnel service runs as root LaunchDaemon `system/com.cloudflare.cloudflared` and reads config from `/etc/cloudflared/config.yml` (not `/opt/homebrew/etc/cloudflared/config.yml`).
