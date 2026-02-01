@@ -75,6 +75,16 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
   - `python3 /Users/mk/clawd/skills/youtube-watcher/scripts/get_transcript.py "<youtube-url>"`
   - Works when the video has captions/auto-subs.
 
+### ClawdHub (skill installer)
+- Skill: `skills/clawdhub/`
+- CLI: `/opt/homebrew/bin/clawdhub`
+- Version: `clawdhub -V`
+- Common commands:
+  - Search: `clawdhub search "query"`
+  - Install: `clawdhub install <slug>`
+  - Update all: `clawdhub update --all --no-input --force`
+  - List: `clawdhub list`
+
 ---
 
 Add whatever helps you do your job. This is your cheat sheet.

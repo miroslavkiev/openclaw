@@ -58,6 +58,11 @@
 ## Writing cleanup (humanizer)
 - Use the `humanizer` skill when editing or reviewing text to reduce AI-writing tells and make it sound more natural/human-written (while preserving meaning and the user's preferred language/style).
 
+## ClawdHub (skills install/update)
+- ClawdHub CLI is installed and used to manage skills in this workspace.
+- Prefer `clawdhub install <slug>` and `clawdhub update --all --no-input --force` for skill lifecycle.
+- Local ClawdHub state directories are ignored in git: `/.clawdhub/` and `/.clawhub/`.
+
 ## YouTube transcripts (youtube-watcher)
 - Skill `youtube-watcher` is installed in workspace at `/Users/mk/clawd/skills/youtube-watcher`.
 - Depends on `yt-dlp` (installed via Homebrew at `/opt/homebrew/bin/yt-dlp`).
