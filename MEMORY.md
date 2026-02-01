@@ -77,6 +77,15 @@
   - `hippocampus: preprocess+encode`
   - `hippocampus: daily decay`
 
+## Proactive agent pattern
+- Installed `proactive-agent` skill as guidance/templates for proactive behavior (reverse prompting, lightweight heartbeat checklist, self-healing, security hardening).
+- Proactive scratchpads live under `notes/areas/`:
+  - `notes/areas/proactive-ideas.md`
+  - `notes/areas/recurring-patterns.md`
+  - `notes/areas/capability-wishlist.md`
+  - `notes/areas/outcome-journal.md`
+- Heartbeat checklist is enabled via `HEARTBEAT.md` (keep it short; no external actions without approval).
+
 ## Keychain-backed secrets.env
 - `scripts/secrets_env_from_keychain.sh` generates `~/.openclaw/secrets/secrets.env` from iCloud Keychain.
 - `scripts/secrets_keychain_from_env.sh` stores secrets from `secrets.env` into Keychain.
