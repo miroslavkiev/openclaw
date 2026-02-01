@@ -58,6 +58,12 @@
 ## Writing cleanup (humanizer)
 - Use the `humanizer` skill when editing or reviewing text to reduce AI-writing tells and make it sound more natural/human-written (while preserving meaning and the user's preferred language/style).
 
+## YouTube transcripts (youtube-watcher)
+- Skill `youtube-watcher` is installed in workspace at `/Users/mk/clawd/skills/youtube-watcher`.
+- Depends on `yt-dlp` (installed via Homebrew at `/opt/homebrew/bin/yt-dlp`).
+- Use to fetch captions/auto-subs via:
+  - `python3 /Users/mk/clawd/skills/youtube-watcher/scripts/get_transcript.py "<youtube-url>"`
+
 ## Memory search (Gemini embeddings) + Hippocampus core
 - Memory search is enabled and uses Gemini embeddings (provider: `gemini`) for semantic recall.
 - Hippocampus is set up with its own workspace at `/Users/mk/.openclaw/hippocampus` and maintains `/Users/mk/.openclaw/hippocampus/HIPPOCAMPUS_CORE.md`.

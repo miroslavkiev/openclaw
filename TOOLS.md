@@ -68,6 +68,13 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
   - Avoid em dashes (—); prefer hyphen (-) for Myroslav.
   - Keep Ukrainian output when requested.
 
+### YouTube transcripts (youtube-watcher)
+- Skill: `skills/youtube-watcher/` (ClawdHub)
+- Prereq: `yt-dlp` installed (Homebrew): `/opt/homebrew/bin/yt-dlp`
+- Usage:
+  - `python3 /Users/mk/clawd/skills/youtube-watcher/scripts/get_transcript.py "<youtube-url>"`
+  - Works when the video has captions/auto-subs.
+
 ---
 
 Add whatever helps you do your job. This is your cheat sheet.
