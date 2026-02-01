@@ -54,6 +54,14 @@
 ## Shell safety (SafeExec)
 - Prefer using the `safe-exec` skill for potentially dangerous shell commands (anything destructive like `rm`, `dd`, system directory changes, etc.) so risk is assessed and human approval is requested when appropriate.
 
+## Memory search (Gemini embeddings) + Hippocampus core
+- Memory search is enabled and uses Gemini embeddings (provider: `gemini`) for semantic recall.
+- Hippocampus is set up with its own workspace at `/Users/mk/.openclaw/hippocampus` and maintains `/Users/mk/.openclaw/hippocampus/HIPPOCAMPUS_CORE.md`.
+- OpenClaw config includes HIPPOCAMPUS_CORE.md via `agents.defaults.memorySearch.extraPaths`.
+- Scheduled hippocampus upkeep via OpenClaw cron:
+  - `hippocampus: preprocess+encode`
+  - `hippocampus: daily decay`
+
 ## Keychain-backed secrets.env
 - `scripts/secrets_env_from_keychain.sh` generates `~/.openclaw/secrets/secrets.env` from iCloud Keychain.
 - `scripts/secrets_keychain_from_env.sh` stores secrets from `secrets.env` into Keychain.

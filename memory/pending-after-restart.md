@@ -1,3 +1,3 @@
-- Enable OpenClaw cron in config (cron.enabled=true, store path) and restart gateway. DONE
-- After restart: verify `openclaw cron status` works and cron tool responds. DONE (`jobs: 0`)
-- If cron works: migrate hourly capability-evolver job from LaunchAgent to OpenClaw cron (optional).
+- Configure memory_search to use Gemini API key (set env var + agents.defaults.memorySearch.provider=gemini, remote.apiKey). DONE
+- Restart gateway. DONE
+- Test memory_search query. DONE
