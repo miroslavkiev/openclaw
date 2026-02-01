@@ -61,6 +61,13 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
   - Non-interactive run:
     - `opencode run "<task>"`
 
+### Writing hygiene (humanizer)
+- Skill: `skills/humanizer/` (ClawdHub)
+- Use when rewriting text to sound more natural/human-written (remove AI-writing patterns).
+- Notes:
+  - Avoid em dashes (—); prefer hyphen (-) for Myroslav.
+  - Keep Ukrainian output when requested.
+
 ---
 
 Add whatever helps you do your job. This is your cheat sheet.

@@ -55,6 +55,9 @@
 ## Shell safety (SafeExec)
 - Prefer using the `safe-exec` skill for potentially dangerous shell commands (anything destructive like `rm`, `dd`, system directory changes, etc.) so risk is assessed and human approval is requested when appropriate.
 
+## Writing cleanup (humanizer)
+- Use the `humanizer` skill when editing or reviewing text to reduce AI-writing tells and make it sound more natural/human-written (while preserving meaning and the user's preferred language/style).
+
 ## Memory search (Gemini embeddings) + Hippocampus core
 - Memory search is enabled and uses Gemini embeddings (provider: `gemini`) for semantic recall.
 - Hippocampus is set up with its own workspace at `/Users/mk/.openclaw/hippocampus` and maintains `/Users/mk/.openclaw/hippocampus/HIPPOCAMPUS_CORE.md`.
