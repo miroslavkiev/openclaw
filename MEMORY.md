@@ -69,6 +69,12 @@
 - Use to fetch captions/auto-subs via:
   - `python3 /Users/mk/clawd/skills/youtube-watcher/scripts/get_transcript.py "<youtube-url>"`
 
+## Memory Search & structure (memory-setup)
+- Skill `memory-setup` is installed to manage persistent context.
+- Workspace follows the standard structure: `memory/logs/`, `memory/projects/`, `memory/groups/`, `memory/system/`.
+- `memory_search` is configured with Gemini embeddings (hot index mode).
+- Rules for continuity: Always search memory before answering about past decisions, people, or preferences.
+
 ## Memory search (Gemini embeddings) + Hippocampus core
 - Memory search is enabled and uses Gemini embeddings (provider: `gemini`) for semantic recall.
 - Hippocampus is set up with its own workspace at `/Users/mk/.openclaw/hippocampus` and maintains `/Users/mk/.openclaw/hippocampus/HIPPOCAMPUS_CORE.md`.
@@ -117,6 +123,7 @@
 ## Restart safety (important)
 - Before triggering any restart (gateway restart / config apply / updates):
   - Write what is still unfinished to `memory/pending-after-restart.md`.
+- Note: Gateway restart via tool may be disabled if `commands.restart` isn’t enabled; in that case use the LaunchAgent/`launchctl` approach.
 - After restart:
   - Check `memory/pending-after-restart.md`, finish the remaining items, then clear/update the file and report.
 
