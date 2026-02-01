@@ -53,6 +53,14 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
   - End message text with `Kind regards,` immediately followed by the signature (only one line break between them).
   - Start emails with `Hi ...` (not `Hello`).
 
+
+### Coding agents
+- OpenCode CLI:
+  - Install: `npm i -g opencode-ai@latest`
+  - Binary: `/opt/homebrew/bin/opencode`
+  - Non-interactive run:
+    - `opencode run "<task>"`
+
 ---
 
 Add whatever helps you do your job. This is your cheat sheet.
