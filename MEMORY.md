@@ -17,6 +17,7 @@
   - On failure, apply a `draft_failed` label and append a JSONL error record to `logs/gmail-drafter-errors.jsonl`.
 
 ## Dual GOG Gmail watch (work + personal)
+- `gog` CLI is installed via Homebrew at: `/opt/homebrew/bin/gog`
 - We run two parallel `gog gmail watch serve` instances (Pub/Sub push receivers):
   - personal: 127.0.0.1:8788 (gmail-personal.kravchen.com)
   - work: 127.0.0.1:8789 (gmail-work.kravchen.com)

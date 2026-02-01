@@ -15,3 +15,6 @@
 # ClawdHub / ClawHub local state
 /.clawdhub/
 /.clawhub/
+
+# Self-improvement logs (keep local by default)
+/.learnings/

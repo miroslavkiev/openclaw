@@ -32,9 +32,14 @@ Things like:
 Skills are shared. Your setup is yours. Keeping them apart means you can update skills without losing your notes, and share skills without leaking your infrastructure.
 
 ### Gmail drafts (gog) - accounts + signature
-- Work Gmail account (API): krmy@ciklum.com
-- Personal Gmail account (API): kravch@gmail.com
-- For work, default send-as: myroslav.kravchenko@ciklum.com
+- `gog` binary: `/opt/homebrew/bin/gog` (Homebrew)
+- gog config file: `~/Library/Application Support/gogcli/config.json`
+- Accounts:
+  - Work Gmail account (API): `krmy@ciklum.com`
+    - Default send-as: `myroslav.kravchenko@ciklum.com`
+    - Default gog `--client`: `work`
+  - Personal Gmail account (API): `kravch@gmail.com`
+    - Default gog `--client`: `personal`
 - Default behavior (important):
   - When you paste an inbound email thread and ask for a reply, I should create a Gmail draft automatically via `gog gmail drafts create/update` (not just output text).
   - Exceptions: if required info is missing, I ask 1-2 clarifying questions first; if you explicitly request “text only”, I will not create a draft.
