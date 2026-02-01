@@ -51,6 +51,9 @@
     - Use env placeholders (`${ENV_VAR}`) inside repo-friendly configs.
   - Use `launchagents/install.sh` to (re)install/restore.
 
+## Shell safety (SafeExec)
+- Prefer using the `safe-exec` skill for potentially dangerous shell commands (anything destructive like `rm`, `dd`, system directory changes, etc.) so risk is assessed and human approval is requested when appropriate.
+
 ## Keychain-backed secrets.env
 - `scripts/secrets_env_from_keychain.sh` generates `~/.openclaw/secrets/secrets.env` from iCloud Keychain.
 - `scripts/secrets_keychain_from_env.sh` stores secrets from `secrets.env` into Keychain.

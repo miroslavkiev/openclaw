@@ -1,2 +1,3 @@
-- DONE: Enabled tools.media.audio (CLI) + JSONL timing markers in scripts/mlx_whisper_transcribe.sh.
-- DONE: Verified with Telegram voice; /tmp/openclaw/audio-transcribe.jsonl shows durationMs.
+- Enable OpenClaw cron in config (cron.enabled=true, store path) and restart gateway. DONE
+- After restart: verify `openclaw cron status` works and cron tool responds. DONE (`jobs: 0`)
+- If cron works: migrate hourly capability-evolver job from LaunchAgent to OpenClaw cron (optional).

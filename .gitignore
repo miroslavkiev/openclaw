@@ -11,3 +11,7 @@
 
 # Optional local-only secrets directory (keep out of git)
 /secrets/
+
+# ClawdHub / ClawHub local state
+/.clawdhub/
+/.clawhub/
