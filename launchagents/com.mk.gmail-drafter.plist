@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key><string>com.mk.gmail-drafter</string>
+
+    <key>ProgramArguments</key>
+    <array>
+      <string>/bin/bash</string>
+      <string>-lc</string>
+      <string>set -euo pipefail; source /Users/mk/.openclaw/secrets/secrets.env; export HOOK_TOKEN="$OPENCLAW_HOOK_TOKEN"; exec /usr/bin/env node /Users/mk/clawd/services/gmail-drafter/gmail-drafter.js</string>
+    </array>
+
+    <key>RunAtLoad</key><true/>
+    <key>KeepAlive</key><true/>
+
+    <key>StandardOutPath</key><string>/Users/mk/Library/Logs/gmail-drafter.log</string>
+    <key>StandardErrorPath</key><string>/Users/mk/Library/Logs/gmail-drafter.err.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>PORT</key><string>18990</string>
+      <key>WORK_ACCOUNT</key><string>krmy@ciklum.com</string>
+      <key>WORK_RECIPIENTS</key><string>myroslav.kravchenko@ciklum.com,krmy@ciklum.com</string>
+      <key>GOG_BIN</key><string>/opt/homebrew/bin/gog</string>
+      <key>GOG_CLIENT</key><string>work</string>
+      <key>PATH</key><string>/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+  </dict>
+</plist>

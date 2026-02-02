@@ -1,0 +1,15 @@
+{
+  "kravch@gmail.com::category:promotions before:2019/01/01 -in:trash": {
+    "account": "kravch@gmail.com",
+    "query": "category:promotions before:2019/01/01 -in:trash",
+    "nextPageToken": "13634930085920746456",
+    "updatedAt": 1769619628,
+    "lastRun": {
+      "candidates": 200,
+      "trashed": 117,
+      "keep": 21,
+      "unclear": 62,
+      "log": "/Users/mk/clawd/logs/gmail-promos-smarttrash-paged-kravch_gmail.com-pre2019-1769619628.json"
+    }
+  }
+}

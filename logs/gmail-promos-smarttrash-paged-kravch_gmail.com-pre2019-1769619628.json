@@ -1,0 +1,13 @@
+{
+  "account": "kravch@gmail.com",
+  "query": "category:promotions before:2019/01/01 -in:trash",
+  "pageTokenUsed": "11070643641166340138",
+  "nextPageToken": "13634930085920746456",
+  "candidates": 200,
+  "selectedTrash": 117,
+  "applied": 117,
+  "keep": 21,
+  "unclear": 62,
+  "errors": [],
+  "failed": []
+}

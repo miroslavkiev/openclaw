@@ -1,0 +1,20 @@
+
+# Local secrets (never commit)
+/launchagents/secrets.env
+/.openclaw/secrets/
+
+# Local logs / scratch
+/logs/
+/tmp/
+/tmp_whisper/
+/canvas/
+
+# Optional local-only secrets directory (keep out of git)
+/secrets/
+
+# ClawdHub / ClawHub local state
+/.clawdhub/
+/.clawhub/
+
+# Self-improvement logs (keep local by default)
+/.learnings/

@@ -1,0 +1,3 @@
+- Configure memory_search to use Gemini API key (set env var + agents.defaults.memorySearch.provider=gemini, remote.apiKey). DONE
+- Restart gateway. DONE
+- Test memory_search query. DONE
