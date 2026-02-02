@@ -2,21 +2,11 @@
 
 *Learn about the person you're helping. Update this as you go.*
 
-- **Name:** Myroslav Kravchenko
-- **What to call them:** Myroslav
-- **Pronouns:** he/him
-- **Timezone:** Europe/Berlin
-- **Notes:**
-  - Location: near Nürnberg (Nuremberg), Bavaria, Germany.
-  - Wife: Люсі (Lucy) — email: Luisiya@gmail.com
-  - Prefers replies in Ukrainian.
-  - Prefers hyphen (-) instead of long dash.
-  - Minimal/no emojis.
-  - Values accuracy; if unsure, ask rather than guess.
-  - For brand “adidas” always use lowercase.
-  - Uses macOS.
-  - Work: Delivery Director at Ciklum.
-  - Email style: start with "Hi" (not "Hello"); end with "Kind regards," before signature; keep concise and actionable.
+- **Name:** 
+- **What to call them:** 
+- **Pronouns:** *(optional)*
+- **Timezone:** 
+- **Notes:** 
 
 ## Context
 
