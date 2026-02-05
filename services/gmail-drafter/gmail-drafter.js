@@ -125,13 +125,10 @@ function looksLikeBroadcast(msg) {
   const subj = (msg.subject || '').toLowerCase();
   const snippet = (msg.snippet || '').toLowerCase();
 
-  // helper: count recipients in header-like strings (rough but effective)
+  // helper: count recipients robustly (display names can contain commas)
   const countRcpts = (s) => {
     if (!s) return 0;
-    return String(s)
-      .split(/[,;]+/)
-      .map((x) => x.trim())
-      .filter(Boolean).length;
+    return extractAllEmails(String(s)).length;
   };
 
   const toCount = countRcpts(to);
@@ -606,16 +603,29 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, si
     '--timeout', '180',
   ], 300000);
 
+  // clawdbot --json may still print non-JSON prelude (doctor warnings, etc.).
+  // Be tolerant: try to parse the last JSON object in stdout.
   let res;
   try {
-    res = JSON.parse(out || '{}');
+    const raw = String(out || '').trim();
+    let jsonText = raw;
+    if (raw && !raw.startsWith('{')) {
+      const idx = raw.lastIndexOf('\n{');
+      if (idx >= 0) jsonText = raw.slice(idx + 1);
+      else {
+        const first = raw.indexOf('{');
+        if (first >= 0) jsonText = raw.slice(first);
+      }
+    }
+    res = JSON.parse(jsonText || '{}');
   } catch (e) {
-    logLine({ event: 'error', where: 'draftWithLlm.parse_json', messageId: replyToMessageId, error: String(e && e.message ? e.message : e), outPreview: String(out || '').slice(0, 500) });
+    logLine({ event: 'error', where: 'draftWithLlm.parse_json', messageId: replyToMessageId, error: String(e && e.message ? e.message : e), outPreview: String(out || '').slice(0, 800) });
     throw e;
   }
 
-  // clawd CLI JSON schema can vary by version. Try a few known shapes.
+  // clawdbot CLI JSON schema can vary by version. Try a few known shapes.
   const candidates = [
+    // older shapes
     res && res.text,
     res && res.reply,
     res && res.payload && res.payload.text,
@@ -623,6 +633,12 @@ async function draftWithLlm({ to, cc, subject, replyToMessageId, contextText, si
     res && Array.isArray(res.messages) && res.messages[0] && res.messages[0].text,
     res && res.result && res.result.text,
     res && res.output && res.output.text,
+
+    // current clawdbot --json shape (result.payloads)
+    res && res.result && Array.isArray(res.result.payloads) && res.result.payloads[0] && res.result.payloads[0].text,
+
+    // sometimes content blocks
+    res && Array.isArray(res.result && res.result.messages) && res.result.messages[0] && res.result.messages[0].content && res.result.messages[0].content[0] && res.result.messages[0].content[0].text,
   ];
   const text = candidates.find((x) => typeof x === 'string' && x.trim()) || '';
   let cleaned = String(text || '').trim();
@@ -708,12 +724,35 @@ async function processQueue() {
       const msg = queue.shift();
       if (!msg) continue;
 
-      const fromEmail = extractEmail(msg.from || '');
-      const subj = msg.subject || '';
+      let fromEmail = extractEmail(msg.from || '');
+      let subj = msg.subject || '';
 
       if (!fromEmail || !subj) {
-        logLine({ event: 'skipped', skipped: [{ reason: 'missing_from_or_subject', from: msg.from, subject: msg.subject, to: msg.to }] });
-        continue;
+        // Reprocess/manual queue may provide only {id}. Try to enrich from Gmail API before skipping.
+        if (msg.id) {
+          try {
+            const full = await getMessageFull(msg.id);
+            const payload = full && full.message && full.message.payload ? full.message.payload : null;
+            const headers = (payload && Array.isArray(payload.headers)) ? payload.headers : [];
+            msg.from = msg.from || pickHeader(headers, 'From');
+            msg.subject = msg.subject || pickHeader(headers, 'Subject');
+            msg.to = msg.to || pickHeader(headers, 'To');
+            msg.cc = msg.cc || pickHeader(headers, 'Cc');
+            msg.bcc = msg.bcc || pickHeader(headers, 'Bcc');
+            msg.deliveredTo = msg.deliveredTo || pickHeader(headers, 'Delivered-To');
+            msg.delivered_to = msg.delivered_to || pickHeader(headers, 'Delivered-To');
+            msg.snippet = msg.snippet || (full && full.message && full.message.snippet ? full.message.snippet : '');
+          } catch (e) {
+            logLine({ event: 'error', where: 'enrich_missing_from_or_subject', messageId: msg.id, error: String(e && e.message ? e.message : e) });
+          }
+        }
+
+        fromEmail = extractEmail(msg.from || '');
+        subj = msg.subject || '';
+        if (!fromEmail || !subj) {
+          logLine({ event: 'skipped', skipped: [{ reason: 'missing_from_or_subject', from: msg.from, subject: msg.subject, to: msg.to, id: msg.id }] });
+          continue;
+        }
       }
       if (!isAllowedSender(fromEmail)) {
         logLine({ event: 'skipped', skipped: [{ fromEmail, subj, reason: 'sender_domain_not_allowed' }] });
@@ -829,10 +868,22 @@ async function processQueue() {
   }
 }
 
+function enqueueMessageId(id, { force = false } = {}) {
+  const sid = String(id || '').trim();
+  if (!sid) return false;
+  if (force) seen.delete(sid);
+  if (!force && seen.has(sid)) return false;
+  remember(sid);
+  queue.push({ id: sid });
+  // fire-and-forget processing
+  processQueue().catch(() => {});
+  return true;
+}
+
 const server = http.createServer(async (req, res) => {
   try {
     if (req.method !== 'POST') return json(res, 405, { ok: false, error: 'method_not_allowed' });
-    if (req.url !== '/gmail-work') return json(res, 404, { ok: false, error: 'not_found' });
+    if (req.url !== '/gmail-work' && req.url !== '/gmail-work/reprocess') return json(res, 404, { ok: false, error: 'not_found' });
 
     const auth = req.headers['authorization'] || '';
     if (!HOOK_TOKEN || auth !== `Bearer ${HOOK_TOKEN}`) {
@@ -847,6 +898,15 @@ const server = http.createServer(async (req, res) => {
       return json(res, 400, { ok: false, error: 'bad_json' });
     }
 
+    // Manual reprocess endpoint: POST /gmail-work/reprocess { "messageId": "...", "force": true }
+    if (req.url === '/gmail-work/reprocess') {
+      const id = payload.messageId || payload.id;
+      const force = Boolean(payload.force);
+      const ok = enqueueMessageId(id, { force });
+      logLine({ event: 'reprocess', messageId: String(id || ''), force, ok });
+      return json(res, ok ? 200 : 409, { ok, enqueued: ok ? 1 : 0 });
+    }
+
     const msgs = Array.isArray(payload.messages) ? payload.messages : [];
     logLine({ event: 'request', count: msgs.length, keys: Object.keys(payload || {}) });
 
@@ -854,14 +914,8 @@ const server = http.createServer(async (req, res) => {
     for (const m of msgs) {
       const id = m && m.id;
       if (!id) continue;
-      if (seen.has(String(id))) continue;
-      remember(id);
-      queue.push(m);
-      enqueued += 1;
+      if (enqueueMessageId(id)) enqueued += 1;
     }
-
-    // fire-and-forget processing
-    processQueue().catch(() => {});
 
     return json(res, 200, { ok: true, enqueued, count: msgs.length });
   } catch (e) {

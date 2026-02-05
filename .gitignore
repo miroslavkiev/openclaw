@@ -9,6 +9,15 @@
 /tmp_whisper/
 /canvas/
 
+# Node / npm
+/node_modules/
+/npm-debug.log*
+/yarn-debug.log*
+/yarn-error.log*
+
+# Root scratch files created by tooling
+/tmp_*.txt
+
 # Optional local-only secrets directory (keep out of git)
 /secrets/
 
