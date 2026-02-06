@@ -80,7 +80,7 @@ In group chats where you receive every message, be **smart about when to contrib
 - Respond when directly mentioned or explicitly asked a question.
 - Otherwise, stay quiet unless you can add clear value.
 
-**Exception - “Батьки і ШІ” (Telegram group id `-1003898983945`):**
+**Exception - “Батьки і ШІ” (Telegram group id `-1003898983945`) and “Люся та ШІ” (Telegram group id `-5047651066`):**
 - Respond to **all explicit questions/requests from any participant**, even if not @mentioned.
 - Still stay silent for casual banter / statements that are not requests.
 
