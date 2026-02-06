@@ -113,7 +113,8 @@
 - Group policy: `allowlist` with explicit group chat IDs:
   - `-1003898983945` ("Батьки і ШІ")
   - `-5047651066` ("Люся та ШІ")
-- Group behavior: `requireMention=false` (respond to all group messages).
+- Group behavior: `requireMention=false`.
+  - Operational rule: in “Батьки і ШІ” respond to **all explicit questions/requests from any participant** (not only the owner), even if not @mentioned.
 - Note: If Telegram BotFather privacy mode is ON, unmentioned messages can be blocked. Set `/setprivacy` → Disable and re-add bot to group.
 - Secrets handling note:
   - Source of truth: iCloud Keychain (`openclaw/TELEGRAM_BOT_TOKEN`, account `mk`).
