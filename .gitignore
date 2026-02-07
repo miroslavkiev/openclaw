@@ -27,3 +27,9 @@
 
 # Self-improvement logs (keep local by default)
 /.learnings/
+
+# Generated outputs
+/out/
+
+# Local venvs
+/.venv-*/

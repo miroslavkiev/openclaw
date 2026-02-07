@@ -13,5 +13,6 @@ Capture ideas for things the agent could do proactively (drafts, automations, ch
 - Add a note/tooling reminder: `web_fetch` only supports http(s); use `read`/`exec` for local files like `/tmp/openclaw/*.log`.
 - Add an “auto-triage” snippet for WhatsApp flaps: if we see 428/503 more than N times/day, collect `openclaw status` + `openclaw channels status --probe` and write a concise incident note into today’s memory file.
 - Add a lightweight watchdog for WhatsApp session health: if disconnects happen repeatedly overnight, schedule a morning reminder to Myroslav with count + suggested actions (network check, relink QR) - but only if threshold exceeded.
+- Detect repeated `gmail-watcher` oauth2 `invalid_grant` and (a) log it once/day to `memory/YYYY-MM-DD.md`, (b) notify Myroslav once with the likely fix: re-auth/refresh gog credentials for the affected account.
 
 ## Implemented
